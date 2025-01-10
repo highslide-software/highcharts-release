@@ -220,15 +220,12 @@ export type BreadcrumbsClickCallbackFunction = (event: Event, options: Breadcrum
 /**
  * Callback function to format the breadcrumb text from scratch.
  *
- * @param event
- *        Event.
- *
  * @param options
  *        Breadcrumb options.
  *
  * @return Formatted text or false
  */
-export type BreadcrumbsFormatterCallbackFunction = (event: Event, options: BreadcrumbOptions) => string;
+export type BreadcrumbsFormatterCallbackFunction = (options: BreadcrumbOptions) => string;
 export type BubbleSizeByValue = ("area"|"width");
 export type ButtonRelativeToValue = ("plotBox"|"spacingBox");
 /**
@@ -96181,6 +96178,10 @@ export class Point {
      * `plotY` value is the number of pixels from the right of the `yAxis`.
      */
     plotY?: number;
+    /**
+     * Array of all hovered points when using shared tooltips.
+     */
+    points?: Array<Point>;
     /**
      * Whether the point is selected or not.
      */

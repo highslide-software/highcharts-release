@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-01-10)
  * @module highcharts/modules/color-axis
  * @requires highcharts
  *
@@ -279,7 +279,7 @@ var ColorAxisComposition;
         let colorAxisItems = [], options, i;
         colorAxes.forEach(function (colorAxis) {
             options = colorAxis.options;
-            if (options && options.showInLegend) {
+            if (options?.showInLegend) {
                 // Data classes
                 if (options.dataClasses && options.visible) {
                     colorAxisItems = colorAxisItems.concat(colorAxis.getDataClassLegendSymbols());
@@ -334,8 +334,7 @@ var ColorAxisComposition;
      * @private
      */
     function onSeriesAfterTranslate() {
-        if (this.chart.colorAxis &&
-            this.chart.colorAxis.length ||
+        if (this.chart.colorAxis?.length ||
             this.colorAttribs) {
             this.translateColors();
         }
@@ -1399,7 +1398,7 @@ class ColorAxis extends (highcharts_Axis_commonjs_highcharts_Axis_commonjs2_high
      * @emits Highcharts.ColorAxis#event:drawCrosshair
      */
     drawCrosshair(e, point) {
-        const axis = this, legendItem = axis.legendItem || {}, plotX = point && point.plotX, plotY = point && point.plotY, axisPos = axis.pos, axisLen = axis.len;
+        const axis = this, legendItem = axis.legendItem || {}, plotX = point?.plotX, plotY = point?.plotY, axisPos = axis.pos, axisLen = axis.len;
         let crossPos;
         if (point) {
             crossPos = axis.toPixels(point.getNestedProperty(point.series.colorKey));
@@ -1478,7 +1477,7 @@ class ColorAxis extends (highcharts_Axis_commonjs_highcharts_Axis_commonjs2_high
             axis.destroyItems();
         }
         super.update(newOptions, redraw);
-        if (axis.legendItem && axis.legendItem.label) {
+        if (axis.legendItem?.label) {
             axis.setLegendColor();
             legend.colorizeItem(this, true);
         }
@@ -3030,14 +3029,14 @@ class MapPoint extends ScatterPoint {
         if (bounds) {
             // Cache point bounding box for use to position data labels, bubbles
             // etc
-            const propMiddleLon = properties && properties['hc-middle-lon'], propMiddleLat = properties && properties['hc-middle-lat'];
+            const propMiddleLon = properties?.['hc-middle-lon'], propMiddleLat = properties?.['hc-middle-lat'];
             if (mapView && MapPoint_isNumber(propMiddleLon) && MapPoint_isNumber(propMiddleLat)) {
                 const projectedPoint = projection.forward([propMiddleLon, propMiddleLat]);
                 bounds.midX = projectedPoint[0];
                 bounds.midY = projectedPoint[1];
             }
             else {
-                const propMiddleX = properties && properties['hc-middle-x'], propMiddleY = properties && properties['hc-middle-y'];
+                const propMiddleX = properties?.['hc-middle-x'], propMiddleY = properties?.['hc-middle-y'];
                 bounds.midX = (bounds.x1 + (bounds.x2 - bounds.x1) * MapPoint_pick(this.middleX, MapPoint_isNumber(propMiddleX) ? propMiddleX : 0.5));
                 let middleYFraction = MapPoint_pick(this.middleY, MapPoint_isNumber(propMiddleY) ? propMiddleY : 0.5);
                 // No geographic geometry, only path given => flip
@@ -6946,7 +6945,7 @@ class MapSeries extends ScatterSeries {
                             'highcharts-name-' +
                                 point.name.replace(/ /g, '-').toLowerCase();
                     }
-                    if (point.properties && point.properties['hc-key']) {
+                    if (point.properties?.['hc-key']) {
                         className +=
                             ' highcharts-key-' +
                                 point.properties['hc-key'].toString().toLowerCase();
@@ -6973,8 +6972,7 @@ class MapSeries extends ScatterSeries {
                         if (animateIn || animateOut) {
                             const strokeWidth = MapSeries_pick(series.getStrokeWidth(series.options), 1 // Styled mode
                             ), inheritedStrokeWidth = (strokeWidth /
-                                (chart.mapView &&
-                                    chart.mapView.getScale() ||
+                                (chart.mapView?.getScale() ||
                                     1));
                             // For animating from undefined, .attr() reads the
                             // property as the starting point
@@ -7022,8 +7020,7 @@ class MapSeries extends ScatterSeries {
                 (series.points || []).forEach((point) => {
                     const graphic = point.graphic;
                     let strokeWidth;
-                    if (graphic &&
-                        graphic['stroke-width'] &&
+                    if (graphic?.['stroke-width'] &&
                         (strokeWidth = this.getStrokeWidth(point.options))) {
                         graphic.attr({
                             'stroke-width': strokeWidth / scale
@@ -7146,8 +7143,7 @@ class MapSeries extends ScatterSeries {
      */
     getStrokeWidth(options) {
         const pointAttrToOptions = this.pointAttrToOptions;
-        return options[pointAttrToOptions &&
-            pointAttrToOptions['stroke-width'] || 'borderWidth'];
+        return options[pointAttrToOptions?.['stroke-width'] || 'borderWidth'];
     }
     /**
      * Define hasData function for non-cartesian series. Returns true if the
@@ -7247,7 +7243,7 @@ class MapSeries extends ScatterSeries {
         // Pick up transform definitions for chart
         mapTransforms = chart.mapTransforms =
             chartOptions.mapTransforms ||
-                mapDataObject && mapDataObject['hc-transform'] ||
+                mapDataObject?.['hc-transform'] ||
                 chart.mapTransforms;
         let mapPoint, props;
         // Cache cos/sin of transform rotation angle
@@ -7397,7 +7393,7 @@ class MapSeries extends ScatterSeries {
      * @private
      */
     translate() {
-        const series = this, doFullTranslate = series.doFullTranslate(), mapView = this.chart.mapView, projection = mapView && mapView.projection;
+        const series = this, doFullTranslate = series.doFullTranslate(), mapView = this.chart.mapView, projection = mapView?.projection;
         // Recalculate box on updated data
         if (this.chart.hasRendered && (this.isDirtyData || !this.hasRendered)) {
             this.processData();
@@ -11305,9 +11301,7 @@ class HeatmapSeries extends HeatmapSeries_ScatterSeries {
         // Setting width and height attributes on image does not affect on its
         // dimensions.
         if (state && state !== 'normal') {
-            const pointMarkerOptions = point.options.marker || {}, seriesMarkerOptions = this.options.marker || {}, seriesStateOptions = (seriesMarkerOptions.states &&
-                seriesMarkerOptions.states[state]) || {}, pointStateOptions = (pointMarkerOptions.states &&
-                pointMarkerOptions.states[state]) || {};
+            const pointMarkerOptions = point.options.marker || {}, seriesMarkerOptions = this.options.marker || {}, seriesStateOptions = (seriesMarkerOptions.states?.[state]) || {}, pointStateOptions = (pointMarkerOptions.states?.[state]) || {};
             // Set new width and height basing on state options.
             const width = (pointStateOptions.width ||
                 seriesStateOptions.width ||
@@ -11333,28 +11327,23 @@ class HeatmapSeries extends HeatmapSeries_ScatterSeries {
     pointAttribs(point, state) {
         const series = this, attr = HeatmapSeries_Series.prototype.pointAttribs.call(series, point, state), seriesOptions = series.options || {}, plotOptions = series.chart.options.plotOptions || {}, seriesPlotOptions = plotOptions.series || {}, heatmapPlotOptions = plotOptions.heatmap || {}, 
         // Get old properties in order to keep backward compatibility
-        borderColor = (point && point.options.borderColor) ||
+        borderColor = point?.options.borderColor ||
             seriesOptions.borderColor ||
             heatmapPlotOptions.borderColor ||
-            seriesPlotOptions.borderColor, borderWidth = (point && point.options.borderWidth) ||
+            seriesPlotOptions.borderColor, borderWidth = point?.options.borderWidth ||
             seriesOptions.borderWidth ||
             heatmapPlotOptions.borderWidth ||
             seriesPlotOptions.borderWidth ||
             attr['stroke-width'];
         // Apply lineColor, or set it to default series color.
-        attr.stroke = ((point && point.marker && point.marker.lineColor) ||
-            (seriesOptions.marker && seriesOptions.marker.lineColor) ||
+        attr.stroke = (point?.marker?.lineColor ||
+            seriesOptions.marker?.lineColor ||
             borderColor ||
             this.color);
         // Apply old borderWidth property if exists.
         attr['stroke-width'] = borderWidth;
         if (state && state !== 'normal') {
-            const stateOptions = HeatmapSeries_merge((seriesOptions.states &&
-                seriesOptions.states[state]), (seriesOptions.marker &&
-                seriesOptions.marker.states &&
-                seriesOptions.marker.states[state]), (point &&
-                point.options.states &&
-                point.options.states[state] || {}));
+            const stateOptions = HeatmapSeries_merge(seriesOptions.states?.[state], seriesOptions.marker?.states?.[state], point?.options.states?.[state] || {});
             attr.fill =
                 stateOptions.color ||
                     highcharts_Color_commonjs_highcharts_Color_commonjs2_highcharts_Color_root_Highcharts_Color_default().parse(attr.fill).brighten(stateOptions.brightness || 0).get();
@@ -11366,12 +11355,12 @@ class HeatmapSeries extends HeatmapSeries_ScatterSeries {
      * @private
      */
     translate() {
-        const series = this, options = series.options, { borderRadius, marker } = options, symbol = marker && marker.symbol || 'rect', shape = HeatmapSeries_symbols[symbol] ? symbol : 'rect', hasRegularShape = ['circle', 'square'].indexOf(shape) !== -1;
+        const series = this, options = series.options, { borderRadius, marker } = options, symbol = marker?.symbol || 'rect', shape = HeatmapSeries_symbols[symbol] ? symbol : 'rect', hasRegularShape = ['circle', 'square'].indexOf(shape) !== -1;
         series.generatePoints();
         for (const point of series.points) {
             const cellAttr = point.getCellAttributes();
             let x = Math.min(cellAttr.x1, cellAttr.x2), y = Math.min(cellAttr.y1, cellAttr.y2), width = Math.max(Math.abs(cellAttr.x2 - cellAttr.x1), 0), height = Math.max(Math.abs(cellAttr.y2 - cellAttr.y1), 0);
-            point.hasImage = (point.marker && point.marker.symbol || symbol || '').indexOf('url') === 0;
+            point.hasImage = (point.marker?.symbol || symbol || '').indexOf('url') === 0;
             // If marker shape is regular (square), find the shorter cell's
             // side.
             if (hasRegularShape) {
@@ -11458,7 +11447,7 @@ highcharts_SeriesRegistry_commonjs_highcharts_SeriesRegistry_commonjs2_highchart
 
 ;// ./code/es-modules/masters/modules/map.src.js
 /**
- * @license Highmaps JS v12.1.2 (2024-12-21)
+ * @license Highmaps JS v12.1.2-modified (2025-01-10)
  * @module highcharts/modules/map
  * @requires highcharts
  *

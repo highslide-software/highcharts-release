@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-01-10)
  * @module highcharts/highcharts-3d
  * @requires highcharts
  *
@@ -2419,7 +2419,7 @@ const { addEvent: Axis3DComposition_addEvent, merge: Axis3DComposition_merge, pi
  */
 function onAxisAfterSetOptions() {
     const axis = this, chart = axis.chart, options = axis.options;
-    if (chart.is3d && chart.is3d() && axis.coll !== 'colorAxis') {
+    if (chart.is3d?.() && axis.coll !== 'colorAxis') {
         options.tickWidth = Axis3DComposition_pick(options.tickWidth, 0);
         options.gridLineWidth = Axis3DComposition_pick(options.gridLineWidth, 1);
     }
@@ -2584,7 +2584,7 @@ function wrapAxisGetSlotWidth(proceed, tick) {
         }
         // If next label position is defined, then recalculate its position
         // basing on the perspective.
-        if (nextTick && nextTick.label && nextTick.label.xy) {
+        if (nextTick?.label?.xy) {
             nextLabelPos = Axis3DComposition_perspective3D({
                 x: nextTick.label.xy.x,
                 y: nextTick.label.xy.y,
@@ -2946,7 +2946,7 @@ class Series3D extends (highcharts_Series_commonjs_highcharts_Series_commonjs2_h
         series.zPadding = stack *
             (seriesOptions.depth || 0 + (seriesOptions.groupZPadding || 1));
         series.data.forEach((rawPoint) => {
-            if (zAxis && zAxis.translate) {
+            if (zAxis?.translate) {
                 zValue = zAxis.logarithmic && zAxis.val2lin ?
                     zAxis.val2lin(rawPoint.z) :
                     rawPoint.z; // #4562
@@ -3076,7 +3076,7 @@ class SVGElement3D extends SVGElement {
      * @private
      */
     singleSetterForParts(prop, val, values, verb, duration, complete) {
-        const elem3d = this, newAttr = {}, optionsToApply = [null, null, (verb || 'attr'), duration, complete], hasZIndexes = values && values.zIndexes;
+        const elem3d = this, newAttr = {}, optionsToApply = [null, null, (verb || 'attr'), duration, complete], hasZIndexes = values?.zIndexes;
         if (!values) {
             newAttr[prop] = val;
             optionsToApply[0] = newAttr;
@@ -3084,7 +3084,7 @@ class SVGElement3D extends SVGElement {
         else {
             // It is needed to deal with the whole group zIndexing
             // in case of graph rotation
-            if (hasZIndexes && hasZIndexes.group) {
+            if (hasZIndexes?.group) {
                 elem3d.attr({
                     zIndex: hasZIndexes.group
                 });
@@ -3411,7 +3411,7 @@ var SVGRenderer3D;
             return elementProto.attr.apply(this, arguments);
         };
         result.animate = function (params, duration, complete) {
-            if (params && params.faces) {
+            if (params?.faces) {
                 while (result.faces.length > params.faces.length) {
                     result.faces.pop().destroy();
                 }
@@ -4135,8 +4135,7 @@ class ZAxis extends (highcharts_Axis_commonjs_highcharts_Axis_commonjs2_highchar
     setAxisSize() {
         const chart = this.chart;
         super.setAxisSize();
-        this.width = this.len = (chart.options.chart.options3d &&
-            chart.options.chart.options3d.depth) || 0;
+        this.width = this.len = chart.options.chart.options3d?.depth || 0;
         this.right = chart.chartWidth - this.width - this.left;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-01-10)
  * @module highcharts/highcharts-more
  * @requires highcharts
  *
@@ -9555,7 +9555,7 @@ var RadialAxis;
                 this.options.labels &&
                 this.options.labels.allowOverlap !== true) {
                 return this.tickPositions
-                    .map((pos) => this.ticks[pos] && this.ticks[pos].label)
+                    .map((pos) => this.ticks[pos]?.label)
                     .filter((label) => Boolean(label));
             }
         };
@@ -9921,7 +9921,7 @@ var RadialAxis;
      * Finalize modification of axis instance with radial logic.
      */
     function onAxisAfterInit() {
-        const chart = this.chart, options = this.options, isHidden = chart.angular && this.isXAxis, pane = this.pane, paneOptions = pane && pane.options;
+        const chart = this.chart, options = this.options, isHidden = chart.angular && this.isXAxis, pane = this.pane, paneOptions = pane?.options;
         if (!isHidden && pane && (chart.angular || chart.polar)) {
             const fullCircle = Math.PI * 2, 
             // Start and end angle options are given in degrees relative to
@@ -9964,8 +9964,7 @@ var RadialAxis;
      * Remove label collector function on axis remove/update.
      */
     function onAxisDestroy() {
-        if (this.chart &&
-            this.chart.labelCollectors) {
+        if (this.chart?.labelCollectors) {
             const index = (this.labelCollector ?
                 this.chart.labelCollectors.indexOf(this.labelCollector) :
                 -1);
@@ -11418,7 +11417,7 @@ var WaterfallAxis;
      */
     function onAxisAfterRender() {
         const axis = this, stackLabelOptions = axis.options.stackLabels;
-        if (stackLabelOptions && stackLabelOptions.enabled &&
+        if (stackLabelOptions?.enabled &&
             axis.waterfall.stacks) {
             axis.waterfall.renderStackTotals();
         }
@@ -11478,7 +11477,7 @@ var WaterfallAxis;
          * @function Highcharts.Axis#renderWaterfallStackTotals
          */
         renderStackTotals() {
-            const yAxis = this.axis, waterfallStacks = yAxis.waterfall.stacks, stackTotalGroup = (yAxis.stacking && yAxis.stacking.stackTotalGroup), dummyStackItem = new (highcharts_StackItem_commonjs_highcharts_StackItem_commonjs2_highcharts_StackItem_root_Highcharts_StackItem_default())(yAxis, yAxis.options.stackLabels || {}, false, 0, void 0);
+            const yAxis = this.axis, waterfallStacks = yAxis.waterfall.stacks, stackTotalGroup = yAxis.stacking?.stackTotalGroup, dummyStackItem = new (highcharts_StackItem_commonjs_highcharts_StackItem_commonjs2_highcharts_StackItem_root_Highcharts_StackItem_default())(yAxis, yAxis.options.stackLabels || {}, false, 0, void 0);
             this.dummyStackItem = dummyStackItem;
             // Render each waterfall stack total
             if (stackTotalGroup) {
@@ -12034,7 +12033,7 @@ class WaterfallSeries extends WaterfallSeries_ColumnSeries {
                             actualStackX.negTotal;
                         actualStackX.stackTotal = posTotal + negTotal;
                         statesLen = actualStackX.stackState.length;
-                        if (xPoint && xPoint.isIntermediateSum) {
+                        if (xPoint?.isIntermediateSum) {
                             calculateStackState(prevSum, actualSum, 0, prevSum);
                             prevSum = actualSum;
                             actualSum = seriesThreshold;
@@ -12043,7 +12042,7 @@ class WaterfallSeries extends WaterfallSeries_ColumnSeries {
                             interSum ^= stackThreshold;
                             stackThreshold ^= interSum;
                         }
-                        else if (xPoint && xPoint.isSum) {
+                        else if (xPoint?.isSum) {
                             calculateStackState(seriesThreshold, totalYVal, statesLen, 0);
                             stackThreshold = seriesThreshold;
                         }

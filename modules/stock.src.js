@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-01-10)
  * @module highcharts/modules/broken-axis
  * @requires highcharts
  *
@@ -1700,7 +1700,7 @@ function arc(cx, cy, w, h, options) {
  * Callout shape used for default tooltips.
  */
 function callout(x, y, w, h, options) {
-    const arrowLength = 6, halfDistance = 6, r = Math.min((options && options.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options && options.anchorX, anchorY = options && options.anchorY || 0;
+    const arrowLength = 6, halfDistance = 6, r = Math.min((options?.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options?.anchorX, anchorY = options?.anchorY || 0;
     const path = roundedRect(x, y, w, h, { r });
     if (!Symbols_isNumber(anchorX)) {
         return path;
@@ -1785,7 +1785,7 @@ function diamond(x, y, w, h) {
  *
  */
 function rect(x, y, w, h, options) {
-    if (options && options.r) {
+    if (options?.r) {
         return roundedRect(x, y, w, h, options);
     }
     return [
@@ -2064,8 +2064,8 @@ var ScrollbarAxis;
     ScrollbarAxis.compose = compose;
     /** @private */
     function getExtremes(axis) {
-        const axisMin = ScrollbarAxis_pick(axis.options && axis.options.min, axis.min);
-        const axisMax = ScrollbarAxis_pick(axis.options && axis.options.max, axis.max);
+        const axisMin = ScrollbarAxis_pick(axis.options?.min, axis.min);
+        const axisMax = ScrollbarAxis_pick(axis.options?.max, axis.max);
         return {
             axisMin,
             axisMax,
@@ -2094,9 +2094,7 @@ var ScrollbarAxis;
      */
     function onAxisAfterInit() {
         const axis = this;
-        if (axis.options &&
-            axis.options.scrollbar &&
-            axis.options.scrollbar.enabled) {
+        if (axis.options?.scrollbar?.enabled) {
             // Predefined options:
             axis.options.scrollbar.vertical = !axis.horiz;
             axis.options.startOnTick = axis.options.endOnTick = false;
@@ -5255,7 +5253,7 @@ var OrdinalAxis;
             // On touch devices, let default function handle the pinching
             (!e.touches || e.touches.length <= 1)) {
             const mouseDownX = chart.mouseDownX, extremes = xAxis.getExtremes(), dataMin = extremes.dataMin, dataMax = extremes.dataMax, min = extremes.min, max = extremes.max, hoverPoints = chart.hoverPoints, closestPointRange = (xAxis.closestPointRange ||
-                (xAxis.ordinal && xAxis.ordinal.overscrollPointsRange)), pointPixelWidth = (xAxis.translationSlope *
+                xAxis.ordinal?.overscrollPointsRange), pointPixelWidth = (xAxis.translationSlope *
                 (xAxis.ordinal.slope || closestPointRange)), 
             // How many ordinal units did we move?
             movedUnits = Math.round((mouseDownX - chartX) / pointPixelWidth), 
@@ -5335,7 +5333,7 @@ var OrdinalAxis;
         const xAxis = this.xAxis;
         // Destroy the extended ordinal index on updated data
         // and destroy extendedOrdinalPositions, #16055.
-        if (xAxis && xAxis.options.ordinal) {
+        if (xAxis?.options.ordinal) {
             delete xAxis.ordinal.index;
             delete xAxis.ordinal.originalOrdinalRange;
         }
@@ -5369,10 +5367,8 @@ var OrdinalAxis;
             // Final return value is based on ordinalIndex
         }
         else {
-            extendedOrdinalPositions =
-                ordinal.getExtendedPositions &&
-                    ordinal.getExtendedPositions();
-            if (!(extendedOrdinalPositions && extendedOrdinalPositions.length)) {
+            extendedOrdinalPositions = ordinal.getExtendedPositions?.();
+            if (!extendedOrdinalPositions?.length) {
                 return val;
             }
             const length = extendedOrdinalPositions.length;
@@ -5863,7 +5859,7 @@ var OrdinalAxis;
             return ret;
         }
         /**
-         * If overscroll is pixel or pecentage value, convert it to axis range.
+         * If overscroll is pixel or percentage value, convert it to axis range.
          *
          * @private
          * @param {number | string} overscroll
@@ -5878,6 +5874,16 @@ var OrdinalAxis;
             };
             if (OrdinalAxis_isString(overscroll)) {
                 const overscrollValue = parseInt(overscroll, 10);
+                let isFullRange;
+                // #22334
+                if (OrdinalAxis_defined(axis.min) && OrdinalAxis_defined(axis.max) &&
+                    OrdinalAxis_defined(axis.dataMin) && OrdinalAxis_defined(axis.dataMax)) {
+                    isFullRange =
+                        axis.max - axis.min === axis.dataMax - axis.dataMin;
+                    if (!isFullRange) {
+                        this.originalOrdinalRange = axis.max - axis.min;
+                    }
+                }
                 if (/%$/.test(overscroll)) {
                     // If overscroll is percentage
                     return calculateOverscroll(overscrollValue / 100);
@@ -5886,7 +5892,8 @@ var OrdinalAxis;
                     // If overscroll is pixels, it is limited to 90% of the axis
                     // length to prevent division by zero
                     const limitedOverscrollValue = Math.min(overscrollValue, axis.len * 0.9), pixelToPercent = limitedOverscrollValue / axis.len;
-                    return calculateOverscroll(pixelToPercent / (1 - pixelToPercent));
+                    return calculateOverscroll(pixelToPercent /
+                        (isFullRange ? (1 - pixelToPercent) : 1));
                 }
                 // If overscroll is a string but not pixels or percentage,
                 // return 0 as no overscroll
@@ -8391,7 +8398,7 @@ function getForcedAxisOptions(type, chartOptions) {
     if (type === 'xAxis') {
         // Always disable startOnTick:true on the main axis when the navigator
         // is enabled (#1090)
-        const navigatorEnabled = StockChart_pick(chartOptions.navigator && chartOptions.navigator.enabled, Navigator_NavigatorDefaults.enabled, true);
+        const navigatorEnabled = StockChart_pick(chartOptions.navigator?.enabled, Navigator_NavigatorDefaults.enabled, true);
         const axisOptions = {
             type: 'datetime',
             categories: void 0
@@ -8445,7 +8452,7 @@ class StockChart extends (highcharts_Chart_commonjs_highcharts_Chart_commonjs2_h
         const defaultOptions = getOptions(), xAxisOptions = userOptions.xAxis, yAxisOptions = userOptions.yAxis, 
         // Always disable startOnTick:true on the main axis when the
         // navigator is enabled (#1090)
-        navigatorEnabled = StockChart_pick(userOptions.navigator && userOptions.navigator.enabled, Navigator_NavigatorDefaults.enabled, true);
+        navigatorEnabled = StockChart_pick(userOptions.navigator?.enabled, Navigator_NavigatorDefaults.enabled, true);
         // Avoid doing these twice
         userOptions.xAxis = userOptions.yAxis = void 0;
         const options = StockChart_merge({
@@ -8476,7 +8483,7 @@ class StockChart extends (highcharts_Chart_commonjs_highcharts_Chart_commonjs2_h
                 text: null
             },
             tooltip: {
-                split: StockChart_pick(defaultOptions.tooltip && defaultOptions.tooltip.split, true),
+                split: StockChart_pick(defaultOptions.tooltip?.split, true),
                 crosshairs: true
             },
             legend: {
@@ -8588,7 +8595,7 @@ StockChart_addEvent((highcharts_Chart_commonjs_highcharts_Chart_commonjs2_highch
         if (!crossLabel) {
             crossLabel = axis.crossLabel = chart.renderer
                 .label('', 0, void 0, options.shape || 'callout')
-                .addClass('highcharts-crosshair-label highcharts-color-' + (point && point.series ?
+                .addClass('highcharts-crosshair-label highcharts-color-' + (point?.series ?
                 point.series.colorIndex :
                 axis.series[0] && this.series[0].colorIndex))
                 .attr({
@@ -8603,9 +8610,7 @@ StockChart_addEvent((highcharts_Chart_commonjs_highcharts_Chart_commonjs2_highch
                 crossLabel
                     .attr({
                     fill: options.backgroundColor ||
-                        ( // #14888
-                        point && point.series &&
-                            point.series.color) ||
+                        point?.series?.color || // #14888
                         "#666666" /* Palette.neutralColor60 */,
                     stroke: options.borderColor || '',
                     'stroke-width': options.borderWidth || 0
@@ -8639,7 +8644,7 @@ StockChart_addEvent((highcharts_Chart_commonjs_highcharts_Chart_commonjs2_highch
             axis.toValue(horiz ? e.chartX : e.chartY);
         // Crosshair should be rendered within Axis range (#7219) and the point
         // of currentPriceIndicator should be inside the plot area (#14879).
-        const isInside = point && point.series ?
+        const isInside = point?.series ?
             point.series.isPointInside(point) :
             (StockChart_isNumber(value) && value > min && value < max);
         let text = '';
@@ -11406,7 +11411,7 @@ var BrokenAxis;
         static lin2Val(val) {
             const axis = this;
             const brokenAxis = axis.brokenAxis;
-            const breakArray = brokenAxis && brokenAxis.breakArray;
+            const breakArray = brokenAxis?.breakArray;
             if (!breakArray || !BrokenAxis_isNumber(val)) {
                 return val;
             }
@@ -11431,7 +11436,7 @@ var BrokenAxis;
         static val2Lin(val) {
             const axis = this;
             const brokenAxis = axis.brokenAxis;
-            const breakArray = brokenAxis && brokenAxis.breakArray;
+            const breakArray = brokenAxis?.breakArray;
             if (!breakArray || !BrokenAxis_isNumber(val)) {
                 return val;
             }
@@ -13356,7 +13361,7 @@ const DataGroupingComposition = {
 
 ;// ./code/es-modules/masters/modules/datagrouping.src.js
 /**
- * @license Highstock JS v12.1.2 (2024-12-21)
+ * @license Highstock JS v12.1.2-modified (2025-01-10)
  * @module highcharts/modules/datagrouping
  * @requires highcharts
  *
@@ -13678,7 +13683,7 @@ const MouseWheelZoomComposition = {
 
 ;// ./code/es-modules/masters/modules/mouse-wheel-zoom.src.js
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-01-10)
  * @module highcharts/modules/mouse-wheel-zoom
  * @requires highcharts
  *
@@ -13698,7 +13703,7 @@ mouse_wheel_zoom_src_G.MouseWheelZoom.compose(mouse_wheel_zoom_src_G.Chart);
 
 ;// ./code/es-modules/masters/modules/stock.src.js
 /**
- * @license Highstock JS v12.1.2 (2024-12-21)
+ * @license Highstock JS v12.1.2-modified (2025-01-10)
  * @module highcharts/modules/stock
  * @requires highcharts
  *
