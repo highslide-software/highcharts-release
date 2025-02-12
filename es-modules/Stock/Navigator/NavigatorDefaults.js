@@ -87,7 +87,7 @@ const NavigatorDefaults = {
      * @sample {highstock} stock/navigator/margin/
      *         A margin of 2 draws the navigator closer to the X axis labels
      */
-    margin: 25,
+    margin: 22,
     /**
      * Whether the mask should be inside the range marking the zoomed
      * range, or outside. In Highcharts Stock 1.x it was always `false`.

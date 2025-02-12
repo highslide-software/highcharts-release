@@ -69,7 +69,7 @@ function boostEnabled(chart) {
 /**
  * @private
  */
-function compose(SeriesClass, seriesTypes, wglMode) {
+function compose(SeriesClass, seriesTypes, PointClass, wglMode) {
     if (pushUnique(composed, 'Boost.Series')) {
         const plotOptions = getOptions().plotOptions, seriesProto = SeriesClass.prototype;
         addEvent(SeriesClass, 'destroy', onSeriesDestroy);
@@ -87,6 +87,15 @@ function compose(SeriesClass, seriesTypes, wglMode) {
             'drawPoints',
             'render'
         ].forEach((method) => wrapSeriesFunctions(seriesProto, seriesTypes, method));
+        wrap(PointClass.prototype, 'firePointEvent', function (proceed, type, e) {
+            if (type === 'click' && this.series.boosted) {
+                const point = e.point;
+                if ((point.dist || point.distX) >= (point.series.options.marker?.radius ?? 10)) {
+                    return;
+                }
+            }
+            return proceed.apply(this, [].slice.call(arguments, 1));
+        });
         // Set default options
         Boostables.forEach((type) => {
             const typePlotOptions = plotOptions[type];
@@ -670,8 +679,8 @@ function seriesRenderCanvas() {
     const options = this.options || {}, chart = this.chart, chartBoost = chart.boost, seriesBoost = this.boost, xAxis = this.xAxis, yAxis = this.yAxis, xData = options.xData || this.getColumn('x', true), yData = options.yData || this.getColumn('y', true), lowData = this.getColumn('low', true), highData = this.getColumn('high', true), rawData = this.processedData || options.data, xExtremes = xAxis.getExtremes(), 
     // Taking into account the offset of the min point #19497
     xMin = xExtremes.min - (xAxis.minPointOffset || 0), xMax = xExtremes.max + (xAxis.minPointOffset || 0), yExtremes = yAxis.getExtremes(), yMin = yExtremes.min - (yAxis.minPointOffset || 0), yMax = yExtremes.max + (yAxis.minPointOffset || 0), pointTaken = {}, sampling = !!this.sampling, enableMouseTracking = options.enableMouseTracking, threshold = options.threshold, isRange = this.pointArrayMap &&
-        this.pointArrayMap.join(',') === 'low,high', isStacked = !!options.stacking, cropStart = this.cropStart || 0, requireSorting = this.requireSorting, useRaw = !xData, compareX = options.findNearestPointBy === 'x', xDataFull = ((this.getColumn('x', true).length ?
-        this.getColumn('x', true) :
+        this.pointArrayMap.join(',') === 'low,high', isStacked = !!options.stacking, cropStart = this.cropStart || 0, requireSorting = this.requireSorting, useRaw = !xData, compareX = options.findNearestPointBy === 'x', xDataFull = ((this.getColumn('x').length ?
+        this.getColumn('x') :
         void 0) ||
         this.options.xData ||
         this.getColumn('x', true)), lineWidth = pick(options.lineWidth, 1);

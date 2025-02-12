@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-12)
  * @module highcharts/modules/navigator
  * @requires highcharts
  *
@@ -576,7 +576,7 @@ const NavigatorDefaults = {
      * @sample {highstock} stock/navigator/margin/
      *         A margin of 2 draws the navigator closer to the X axis labels
      */
-    margin: 25,
+    margin: 22,
     /**
      * Whether the mask should be inside the range marking the zoomed
      * range, or outside. In Highcharts Stock 1.x it was always `false`.
@@ -1107,7 +1107,7 @@ function arc(cx, cy, w, h, options) {
  * Callout shape used for default tooltips.
  */
 function callout(x, y, w, h, options) {
-    const arrowLength = 6, halfDistance = 6, r = Math.min((options && options.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options && options.anchorX, anchorY = options && options.anchorY || 0;
+    const arrowLength = 6, halfDistance = 6, r = Math.min((options?.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options?.anchorX, anchorY = options?.anchorY || 0;
     const path = roundedRect(x, y, w, h, { r });
     if (!Symbols_isNumber(anchorX)) {
         return path;
@@ -1192,7 +1192,7 @@ function diamond(x, y, w, h) {
  *
  */
 function rect(x, y, w, h, options) {
-    if (options && options.r) {
+    if (options?.r) {
         return roundedRect(x, y, w, h, options);
     }
     return [
@@ -1471,8 +1471,8 @@ var ScrollbarAxis;
     ScrollbarAxis.compose = compose;
     /** @private */
     function getExtremes(axis) {
-        const axisMin = ScrollbarAxis_pick(axis.options && axis.options.min, axis.min);
-        const axisMax = ScrollbarAxis_pick(axis.options && axis.options.max, axis.max);
+        const axisMin = ScrollbarAxis_pick(axis.options?.min, axis.min);
+        const axisMax = ScrollbarAxis_pick(axis.options?.max, axis.max);
         return {
             axisMin,
             axisMax,
@@ -1501,9 +1501,7 @@ var ScrollbarAxis;
      */
     function onAxisAfterInit() {
         const axis = this;
-        if (axis.options &&
-            axis.options.scrollbar &&
-            axis.options.scrollbar.enabled) {
+        if (axis.options?.scrollbar?.enabled) {
             // Predefined options:
             axis.options.scrollbar.vertical = !axis.horiz;
             axis.options.startOnTick = axis.options.endOnTick = false;
@@ -1729,7 +1727,7 @@ const ScrollbarDefaults = {
     /**
      * The margin between the scrollbar and its axis when the scrollbar is
      * applied directly to an axis, or the navigator in case that is enabled.
-     * Defaults to 10 for axis, 0 for navigator.
+     * Defaults to 10 for axis, 3 for navigator.
      *
      * @type {number|undefined}
      */
@@ -3520,9 +3518,9 @@ class Navigator {
             navigator.xAxis.navigatorAxis.toFixedRange = (NavigatorAxisComposition.prototype.toFixedRange.bind(navigator.xAxis.navigatorAxis));
         }
         // Initialize the scrollbar
-        if (chart.options.scrollbar.enabled) {
+        if (chart.options.scrollbar?.enabled) {
             const options = Navigator_merge(chart.options.scrollbar, { vertical: chart.inverted });
-            if (!Navigator_isNumber(options.margin) && navigator.navigatorEnabled) {
+            if (!Navigator_isNumber(options.margin)) {
                 options.margin = chart.inverted ? -3 : 3;
             }
             chart.scrollbar = navigator.scrollbar = new Scrollbar_Scrollbar(chart.renderer, options, chart);
@@ -3951,10 +3949,10 @@ class Navigator {
                 marginName = navigator.opposite ?
                     'marginRight' : 'plotLeft';
             }
-            chart[marginName] =
-                (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
-                    navigator.height + navigator.scrollbarHeight :
-                    0) + navigator.navigatorOptions.margin;
+            chart[marginName] = (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
+                navigator.height +
+                    (this.scrollbar?.options.margin || 0) +
+                    navigator.scrollbarHeight : 0) + (navigator.navigatorOptions.margin || 0);
         }), Navigator_addEvent(Navigator, 'setRange', function (e) {
             this.chart.xAxis[0].setExtremes(e.min, e.max, e.redraw, e.animation, e.eventArguments);
         }));

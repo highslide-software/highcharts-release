@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-12)
  * @module highcharts/modules/accessibility
  * @requires highcharts
  *
@@ -239,7 +239,7 @@ function cloneMouseEvent(e) {
         return new win.MouseEvent(e.type, e);
     }
     // No MouseEvent support, try using initMouseEvent
-    if (doc.createEvent) {
+    if (doc?.createEvent) {
         const evt = doc.createEvent('MouseEvent');
         if (evt.initMouseEvent) {
             evt.initMouseEvent(e.type, e.bubbles, // #10561, #12161
@@ -337,7 +337,7 @@ function getFakeMouseEvent(type, position, relatedTarget) {
         });
     }
     // No MouseEvent support, try using initMouseEvent
-    if (doc.createEvent) {
+    if (doc?.createEvent) {
         const evt = doc.createEvent('MouseEvent');
         if (evt.initMouseEvent) {
             evt.initMouseEvent(type, true, // Bubble
@@ -817,7 +817,7 @@ const { defined, find, fireEvent } = (highcharts_commonjs_highcharts_commonjs2_h
 function fireEventOnWrappedOrUnwrappedElement(el, eventObject) {
     const type = eventObject.type;
     const hcEvents = el.hcEvents;
-    if (!!ChartUtilities_doc.createEvent &&
+    if (!!ChartUtilities_doc?.createEvent &&
         (el.dispatchEvent || el.fireEvent)) {
         if (el.dispatchEvent) {
             el.dispatchEvent(eventObject);
@@ -2973,6 +2973,11 @@ class MenuComponent extends Accessibility_AccessibilityComponent {
             // enabled on chart
             validate: function () {
                 return !!chart.exporting &&
+                    chart
+                        .options
+                        .exporting
+                        ?.buttons
+                        ?.contextButton.enabled !== false &&
                     chart.options.exporting.enabled !== false &&
                     chart.options.exporting.accessibility.enabled !==
                         false;
@@ -4534,7 +4539,7 @@ const NavigatorDefaults = {
      * @sample {highstock} stock/navigator/margin/
      *         A margin of 2 draws the navigator closer to the X axis labels
      */
-    margin: 25,
+    margin: 22,
     /**
      * Whether the mask should be inside the range marking the zoomed
      * range, or outside. In Highcharts Stock 1.x it was always `false`.
@@ -5065,7 +5070,7 @@ function arc(cx, cy, w, h, options) {
  * Callout shape used for default tooltips.
  */
 function callout(x, y, w, h, options) {
-    const arrowLength = 6, halfDistance = 6, r = Math.min((options && options.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options && options.anchorX, anchorY = options && options.anchorY || 0;
+    const arrowLength = 6, halfDistance = 6, r = Math.min((options?.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options?.anchorX, anchorY = options?.anchorY || 0;
     const path = roundedRect(x, y, w, h, { r });
     if (!Symbols_isNumber(anchorX)) {
         return path;
@@ -5150,7 +5155,7 @@ function diamond(x, y, w, h) {
  *
  */
 function rect(x, y, w, h, options) {
-    if (options && options.r) {
+    if (options?.r) {
         return roundedRect(x, y, w, h, options);
     }
     return [
@@ -5429,8 +5434,8 @@ var ScrollbarAxis;
     ScrollbarAxis.compose = compose;
     /** @private */
     function getExtremes(axis) {
-        const axisMin = ScrollbarAxis_pick(axis.options && axis.options.min, axis.min);
-        const axisMax = ScrollbarAxis_pick(axis.options && axis.options.max, axis.max);
+        const axisMin = ScrollbarAxis_pick(axis.options?.min, axis.min);
+        const axisMax = ScrollbarAxis_pick(axis.options?.max, axis.max);
         return {
             axisMin,
             axisMax,
@@ -5459,9 +5464,7 @@ var ScrollbarAxis;
      */
     function onAxisAfterInit() {
         const axis = this;
-        if (axis.options &&
-            axis.options.scrollbar &&
-            axis.options.scrollbar.enabled) {
+        if (axis.options?.scrollbar?.enabled) {
             // Predefined options:
             axis.options.scrollbar.vertical = !axis.horiz;
             axis.options.startOnTick = axis.options.endOnTick = false;
@@ -5687,7 +5690,7 @@ const ScrollbarDefaults = {
     /**
      * The margin between the scrollbar and its axis when the scrollbar is
      * applied directly to an axis, or the navigator in case that is enabled.
-     * Defaults to 10 for axis, 0 for navigator.
+     * Defaults to 10 for axis, 3 for navigator.
      *
      * @type {number|undefined}
      */
@@ -7478,9 +7481,9 @@ class Navigator {
             navigator.xAxis.navigatorAxis.toFixedRange = (NavigatorAxisComposition.prototype.toFixedRange.bind(navigator.xAxis.navigatorAxis));
         }
         // Initialize the scrollbar
-        if (chart.options.scrollbar.enabled) {
+        if (chart.options.scrollbar?.enabled) {
             const options = Navigator_merge(chart.options.scrollbar, { vertical: chart.inverted });
-            if (!Navigator_isNumber(options.margin) && navigator.navigatorEnabled) {
+            if (!Navigator_isNumber(options.margin)) {
                 options.margin = chart.inverted ? -3 : 3;
             }
             chart.scrollbar = navigator.scrollbar = new Scrollbar_Scrollbar(chart.renderer, options, chart);
@@ -7909,10 +7912,10 @@ class Navigator {
                 marginName = navigator.opposite ?
                     'marginRight' : 'plotLeft';
             }
-            chart[marginName] =
-                (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
-                    navigator.height + navigator.scrollbarHeight :
-                    0) + navigator.navigatorOptions.margin;
+            chart[marginName] = (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
+                navigator.height +
+                    (this.scrollbar?.options.margin || 0) +
+                    navigator.scrollbarHeight : 0) + (navigator.navigatorOptions.margin || 0);
         }), Navigator_addEvent(Navigator, 'setRange', function (e) {
             this.chart.xAxis[0].setExtremes(e.min, e.max, e.redraw, e.animation, e.eventArguments);
         }));
@@ -8943,7 +8946,7 @@ class NewDataAnnouncer {
  * */
 
 
-const { doc: ProxyElement_doc } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
+const { doc: ProxyElement_doc, win: ProxyElement_win } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
 
 const { attr: ProxyElement_attr, css: ProxyElement_css, merge: ProxyElement_merge } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
 
@@ -9118,10 +9121,13 @@ class ProxyElement {
         const posElement = this.target.visual || clickTargetElement;
         const chartDiv = this.chart.renderTo, pointer = this.chart.pointer;
         if (chartDiv && posElement?.getBoundingClientRect && pointer) {
-            const rectEl = posElement.getBoundingClientRect(), chartPos = pointer.getChartPosition();
+            const scrollTop = ProxyElement_win.scrollY ||
+                ProxyElement_doc.documentElement.scrollTop, rectEl = posElement.getBoundingClientRect(), chartPos = pointer.getChartPosition();
             return {
                 x: (rectEl.left - chartPos.left) / chartPos.scaleX,
-                y: (rectEl.top - chartPos.top) / chartPos.scaleY,
+                // #21994, Add scroll position as "getBoundingClientRect"
+                // returns the position from the viewport, not the document top.
+                y: ((rectEl.top + scrollTop) - chartPos.top) / chartPos.scaleY,
                 width: rectEl.right / chartPos.scaleX -
                     rectEl.left / chartPos.scaleX,
                 height: rectEl.bottom / chartPos.scaleY -

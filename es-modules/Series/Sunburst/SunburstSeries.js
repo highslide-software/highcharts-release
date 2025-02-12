@@ -75,17 +75,16 @@ const getEndPoint = function getEndPoint(x, y, angle, distance) {
 /** @private */
 function getDlOptions(params) {
     // Set options to new object to avoid problems with scope
-    const point = params.point, shape = isObject(params.shapeArgs) ? params.shapeArgs : {}, optionsPoint = (isObject(params.optionsPoint) ?
+    const point = params.point, shape = isObject(params.shapeArgs) ? params.shapeArgs : {}, { end = 0, radius = 0, start = 0 } = shape, optionsPoint = (isObject(params.optionsPoint) ?
         params.optionsPoint.dataLabels :
         {}), 
     // The splat was used because levels dataLabels
     // options doesn't work as an array
     optionsLevel = splat(isObject(params.level) ?
         params.level.dataLabels :
-        {})[0], options = merge({
-        style: {}
-    }, optionsLevel, optionsPoint), { innerArcLength = 0, outerArcLength = 0 } = point;
-    let rotationRad, rotation, rotationMode = options.rotationMode;
+        {})[0], options = merge(optionsLevel, optionsPoint), style = options.style = options.style || {}, { innerArcLength = 0, outerArcLength = 0 } = point;
+    let rotationRad, rotation, rotationMode = options.rotationMode, width = defined(style.width) ?
+        parseInt(style.width || '0', 10) : void 0;
     if (!isNumber(options.rotation)) {
         if (rotationMode === 'auto' || rotationMode === 'circular') {
             if (options.useHTML &&
@@ -94,8 +93,7 @@ function getDlOptions(params) {
                 // for HTML labels, see #18953
                 rotationMode = 'auto';
             }
-            if (innerArcLength < 1 &&
-                outerArcLength > shape.radius) {
+            if (innerArcLength < 1 && outerArcLength > radius) {
                 rotationRad = 0;
                 // Trigger setTextPath function to get textOutline etc.
                 if (point.dataLabelPath && rotationMode === 'circular') {
@@ -103,9 +101,13 @@ function getDlOptions(params) {
                         enabled: true
                     };
                 }
+                // If the slice is less than 180 degrees, set a reasonable width
+                // for fitting into the open slice (#22532)
+                if (end - start < Math.PI) {
+                    width = radius * 0.7;
+                }
             }
-            else if (innerArcLength > 1 &&
-                outerArcLength > 1.5 * shape.radius) {
+            else if (innerArcLength > 1 && outerArcLength > 1.5 * radius) {
                 if (rotationMode === 'circular') {
                     options.textPath = {
                         enabled: true,
@@ -130,23 +132,19 @@ function getDlOptions(params) {
             }
         }
         if (rotationMode !== 'auto' && rotationMode !== 'circular') {
-            if (point.dataLabel && point.dataLabel.textPath) {
+            if (point.dataLabel?.textPath) {
                 options.textPath = {
                     enabled: false
                 };
             }
-            rotationRad = (shape.end -
-                (shape.end - shape.start) / 2);
+            rotationRad = end - (end - start) / 2;
         }
         if (rotationMode === 'parallel') {
-            options.style.width = Math.min(shape.radius * 2.5, (outerArcLength + innerArcLength) / 2);
+            width = Math.min(radius * 2.5, (outerArcLength + innerArcLength) / 2);
         }
         else {
-            if (!defined(options.style.width) &&
-                shape.radius) {
-                options.style.width = point.node.level === 1 ?
-                    2 * shape.radius :
-                    shape.radius;
+            if (!defined(width) && radius) {
+                width = point.node.level === 1 ? 2 * radius : radius;
             }
         }
         if (rotationMode === 'perpendicular') {
@@ -154,16 +152,25 @@ function getDlOptions(params) {
             // yet because the label is not rendered. A better approach for this
             // would be to hide the label from the `alignDataLabel` function
             // when the actual line height is known.
-            if (outerArcLength < 16) {
-                options.style.width = 1;
+            const h = 16;
+            if (outerArcLength < h) {
+                width = 1;
             }
-            else {
-                options.style.lineClamp = Math.floor(innerArcLength / 16) || 1;
+            else if (shape.radius) {
+                style.lineClamp = Math.floor(innerArcLength / h) || 1;
+                // When the slice is narrow (< 16px) in the inner end, compute a
+                // safe margin to avoid the label overlapping the border
+                // (#22532)
+                const safeMargin = innerArcLength < h ?
+                    radius * ((h - innerArcLength) /
+                        (outerArcLength - innerArcLength)) :
+                    0;
+                width = radius - safeMargin;
             }
         }
         // Apply padding (#8515)
-        options.style.width = Math.max(options.style.width - 2 * (options.padding || 0), 1);
-        rotation = (rotationRad * rad2deg) % 180;
+        width = Math.max((width || 0) - 2 * (options.padding || 0), 1);
+        rotation = ((rotationRad || 0) * rad2deg) % 180;
         if (rotationMode === 'parallel') {
             rotation -= 90;
         }
@@ -184,13 +191,12 @@ function getDlOptions(params) {
             // Center dataLabel - disable textPath
             options.textPath.enabled = false;
             // Setting width and padding
-            options.style.width = Math.max((point.shapeExisting.r * 2) -
+            width = Math.max((point.shapeExisting.r * 2) -
                 2 * (options.padding || 0), 1);
         }
-        else if (point.dlOptions &&
-            point.dlOptions.textPath &&
+        else if (point.dlOptions?.textPath &&
             !point.dlOptions.textPath.enabled &&
-            (rotationMode === 'circular')) {
+            rotationMode === 'circular') {
             // Bring dataLabel back if was a center dataLabel
             options.textPath.enabled = true;
         }
@@ -198,12 +204,12 @@ function getDlOptions(params) {
             // Enable rotation to render text
             options.rotation = 0;
             // Setting width and padding
-            options.style.width = Math.max((point.outerArcLength +
-                point.innerArcLength) / 2 -
+            width = Math.max((outerArcLength + innerArcLength) / 2 -
                 2 * (options.padding || 0), 1);
-            options.style.whiteSpace = 'nowrap';
+            style.whiteSpace = 'nowrap';
         }
     }
+    style.width = width + 'px';
     return options;
 }
 /** @private */
@@ -322,6 +328,9 @@ class SunburstSeries extends TreemapSeries {
         if (labelOptions.textPath && labelOptions.textPath.enabled) {
             return;
         }
+        // In sunburst dataLabel may be placed, but this should be reset to
+        // make sure the dataLabel can be aligned to a new position (#21913)
+        dataLabel.placed = false;
         return super.alignDataLabel.apply(this, arguments);
     }
     /**
