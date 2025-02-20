@@ -220,15 +220,12 @@ export type BreadcrumbsClickCallbackFunction = (event: Event, options: Breadcrum
 /**
  * Callback function to format the breadcrumb text from scratch.
  *
- * @param event
- *        Event.
- *
  * @param options
  *        Breadcrumb options.
  *
  * @return Formatted text or false
  */
-export type BreadcrumbsFormatterCallbackFunction = (event: Event, options: BreadcrumbOptions) => string;
+export type BreadcrumbsFormatterCallbackFunction = (options: BreadcrumbOptions) => string;
 export type BubbleSizeByValue = ("area"|"width");
 export type ButtonRelativeToValue = ("plotBox"|"spacingBox");
 /**
@@ -402,9 +399,9 @@ export type DataParseDateCallbackFunction = (dateValue: string) => number;
  */
 export type DataParsedCallbackFunction = (columns: Array<Array<any>>) => (boolean|undefined);
 /**
- * A column of values in a data table.
+ * A typed array.
  */
-export type DataTableColumn = Array<(boolean|null|number|string|undefined)>;
+export type DataTableColumn = (Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|Uint8Array|Uint8ClampedArray);
 /**
  * A collection of data table columns defined by a object where the key is the
  * column name and the value is an array of the column values.
@@ -10465,7 +10462,7 @@ export interface ExportingOptions {
      * converting the SVG string to an image format. By default this points to
      * Highchart's free web service.
      */
-    url?: string;
+    url?: object;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) Use multi level headers in data
      * table. If csv.columnHeaderFormatter is defined, it has to return objects
@@ -10883,8 +10880,8 @@ export interface GlobalButtonThemeStyleOptions {
 }
 /**
  * (Highcharts, Highstock, Highmaps, Gantt) Global options that don't apply to
- * each chart. These options, like the `lang` options, must be set using the
- * `Highcharts.setOptions` method. (see online documentation for example)
+ * each chart. These options must be set using the `Highcharts.setOptions`
+ * method. (see online documentation for example)
  */
 export interface GlobalOptions {
     /**
@@ -18234,9 +18231,8 @@ export interface Options {
     exporting?: ExportingOptions;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) Global options that don't apply
-     * to each chart. These options, like the `lang` options, must be set using
-     * the `Highcharts.setOptions` method. (see online documentation for
-     * example)
+     * to each chart. These options must be set using the
+     * `Highcharts.setOptions` method. (see online documentation for example)
      */
     global?: GlobalOptions;
     /**
@@ -78217,7 +78213,7 @@ export interface ScrollbarOptions {
     /**
      * (Highstock, Gantt) The margin between the scrollbar and its axis when the
      * scrollbar is applied directly to an axis, or the navigator in case that
-     * is enabled. Defaults to 10 for axis, 0 for navigator.
+     * is enabled. Defaults to 10 for axis, 3 for navigator.
      */
     margin?: (number|undefined);
     /**
@@ -81097,6 +81093,10 @@ export interface SeriesLastPriceOptionsObject {
      */
     color?: string;
     /**
+     * (Highstock) Name of the dash style to use for the line of last price.
+     */
+    dashStyle?: DashStyleValue;
+    /**
      * (Highstock) Enable or disable the indicator.
      */
     enabled?: boolean;
@@ -81107,6 +81107,10 @@ export interface SeriesLastPriceOptionsObject {
      * `.highcharts-crosshair-label` class.
      */
     label?: SeriesLastPriceLabelOptionsObject;
+    /**
+     * (Highstock) Width of the last price line.
+     */
+    width?: number;
 }
 /**
  * (Highstock) A label on the axis next to the crosshair.
@@ -81169,6 +81173,16 @@ export interface SeriesLastVisiblePriceLabelOptionsObject {
  */
 export interface SeriesLastVisiblePriceOptionsObject {
     /**
+     * (Highstock) The color of the line of last visible price. By default,
+     * color is not applied and the line is not visible.
+     */
+    color?: string;
+    /**
+     * (Highstock) Name of the dash style to use for the line of last visible
+     * price.
+     */
+    dashStyle?: DashStyleValue;
+    /**
      * (Highstock) Enable or disable the indicator.
      */
     enabled?: boolean;
@@ -81179,6 +81193,10 @@ export interface SeriesLastVisiblePriceOptionsObject {
      * `.highcharts-crosshair-label` class.
      */
     label?: SeriesLastVisiblePriceLabelOptionsObject;
+    /**
+     * (Highstock) Width of the last visible price line.
+     */
+    width?: number;
 }
 /**
  * Information about the event.
@@ -91308,7 +91326,7 @@ export interface XAxisScrollbarOptions {
     /**
      * (Highstock) The margin between the scrollbar and its axis when the
      * scrollbar is applied directly to an axis, or the navigator in case that
-     * is enabled. Defaults to 10 for axis, 0 for navigator.
+     * is enabled. Defaults to 10 for axis, 3 for navigator.
      */
     margin?: (number|undefined);
     /**
@@ -95987,7 +96005,7 @@ export class DataTable {
      */
     autoId: boolean;
     /**
-     * ID of the table for indentification purposes.
+     * ID of the table for identification purposes.
      */
     id: string;
 }
@@ -96181,6 +96199,10 @@ export class Point {
      * `plotY` value is the number of pixels from the right of the `yAxis`.
      */
     plotY?: number;
+    /**
+     * Array of all hovered points when using shared tooltips.
+     */
+    points?: Array<Point>;
     /**
      * Whether the point is selected or not.
      */
@@ -96500,11 +96522,14 @@ export class Pointer {
     normalize(e: (MouseEvent|PointerEvent|TouchEvent), chartPosition?: OffsetObject): PointerEventObject;
     /**
      * Reset the tracking by hiding the tooltip, the hover series state and the
-     * hover point
+     * hover point.
      *
      * @param allowMove
      *        Instead of destroying the tooltip altogether, allow moving it if
      *        possible.
+     *
+     * @param delay
+     *        The tooltip hide delay in ms.
      */
     reset(allowMove?: boolean, delay?: number): void;
 }
@@ -98601,12 +98626,12 @@ export function fireEvent<T>(el: T, type: string, eventArguments?: (Event|Dictio
  *        The context, a collection of key-value pairs where each key is
  *        replaced by its value.
  *
- * @param chart
- *        A `Chart` instance used to get numberFormatter and time.
+ * @param owner
+ *        A `Chart` or `DataGrid` instance used to get numberFormatter and time.
  *
  * @return The formatted string.
  */
-export function format(str: string, ctx: Record<string, any>, chart?: Chart): string;
+export function format(str: string, ctx: Record<string, any>, owner?: Chart): string;
 /**
  * Get the defer as a number value from series animation options.
  *
@@ -99055,6 +99080,18 @@ export function crisp(value: number, lineWidth: number, inverted?: boolean): num
  * Shorthand to get a cached `Intl.DateTimeFormat` instance.
  */
 export function dateTimeFormat(): void;
+/**
+ * Delete rows. Simplified version of the full `DataTable.deleteRows` method.
+ *
+ * @param rowIndex
+ *        The start row index
+ *
+ * @param rowCount
+ *        The number of rows to delete
+ *
+ * @fires #afterDeleteRows
+ */
+export function deleteRows(rowIndex: number, rowCount?: number): void;
 export function diamond(): void;
 /**
  * Fetches the given column by the canonical column name. Simplified version of
@@ -99160,15 +99197,16 @@ export function roundedRect(): void;
  */
 export function setColumn(columnName: string, column?: DataTableColumn, rowIndex?: number, eventDetail?: Record<string, (boolean|number|string|null|undefined)>): void;
 /**
- * * Sets cell values for multiple columns. Will insert new columns, if not
- * found. Simplified version of the full `DataTable.setColumns`, limited to full
+ * Sets cell values for multiple columns. Will insert new columns, if not found.
+ * Simplified version of the full `DataTableCore.setColumns`, limited to full
  * replacement of the columns (undefined `rowIndex`).
  *
  * @param columns
  *        Columns as a collection, where the keys are the column names.
  *
  * @param rowIndex
- *        Index of the first row to change. Keep undefined to reset.
+ *        Index of the first row to change. Ignored in the `DataTableCore`, as
+ *        it always replaces the full column.
  *
  * @param eventDetail
  *        Custom information for pending events.
@@ -99186,7 +99224,7 @@ export function setColumns(columns: DataTableColumnCollection, rowIndex?: number
  *        Cell values to set.
  *
  * @param rowIndex
- *        Index of the row to set. Leave `undefind` to add as a new row.
+ *        Index of the row to set. Leave `undefined` to add as a new row.
  *
  * @param insert
  *        Whether to insert the row at the given index, or to overwrite the row.

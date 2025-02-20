@@ -148,6 +148,7 @@ class HTMLElement extends SVGElement {
                 fontSize: renderer.style.fontSize
             })
         });
+        this.element.style.whiteSpace = 'nowrap';
     }
     /**
      * Get the correction in X and Y positioning as the element is rotated.
@@ -177,6 +178,7 @@ class HTMLElement extends SVGElement {
         // Some properties require other properties to be set
         if (styles?.textOverflow === 'ellipsis') {
             styles.overflow = 'hidden';
+            styles.whiteSpace = 'nowrap';
         }
         if (styles?.lineClamp) {
             styles.display = '-webkit-box';
