@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v@product.version@ (@product.date@)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/streamgraph
  * @requires highcharts
  *

@@ -20,26 +20,33 @@ import VerletIntegration from '../Networkgraph/VerletIntegration.js';
  * @private
  */
 function barycenter() {
-    const layout = this, gravitationalConstant = layout.options.gravitationalConstant, box = layout.box, nodes = layout.nodes;
+    const layout = this, gravitationalConstant = layout.options.gravitationalConstant || 0, box = layout.box, nodes = layout.nodes, nodeCountSqrt = Math.sqrt(nodes.length);
     let centerX, centerY;
     for (const node of nodes) {
-        if (layout.options.splitSeries && !node.isParentNode) {
-            centerX = node.series.parentNode.plotX;
-            centerY = node.series.parentNode.plotY;
-        }
-        else {
-            centerX = box.width / 2;
-            centerY = box.height / 2;
-        }
         if (!node.fixedPosition) {
-            node.plotX -=
-                (node.plotX - centerX) *
-                    gravitationalConstant /
-                    (node.mass * Math.sqrt(nodes.length));
-            node.plotY -=
-                (node.plotY - centerY) *
-                    gravitationalConstant /
-                    (node.mass * Math.sqrt(nodes.length));
+            const massTimesNodeCountSqrt = node.mass * nodeCountSqrt, plotX = node.plotX || 0, plotY = node.plotY || 0, series = node.series, parentNode = series.parentNode;
+            if (layout.options.splitSeries &&
+                parentNode &&
+                !node.isParentNode) {
+                centerX = parentNode.plotX || 0;
+                centerY = parentNode.plotY || 0;
+            }
+            else {
+                centerX = box.width / 2;
+                centerY = box.height / 2;
+            }
+            node.plotX = plotX - ((plotX - centerX) *
+                gravitationalConstant /
+                massTimesNodeCountSqrt);
+            node.plotY = plotY - ((plotY - centerY) *
+                gravitationalConstant /
+                massTimesNodeCountSqrt);
+            if (series.chart.hoverPoint === node &&
+                // If redrawHalo exists we know its a draggable series and any
+                // halo present should be redrawn to update its visual position
+                series.redrawHalo && series.halo) {
+                series.redrawHalo(node);
+            }
         }
     }
 }

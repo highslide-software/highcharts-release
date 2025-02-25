@@ -22,15 +22,21 @@ const { defined, isNumber, pick } = U;
 function arc(cx, cy, w, h, options) {
     const arc = [];
     if (options) {
-        const start = options.start || 0, rx = pick(options.r, w), ry = pick(options.r, h || w), 
+        let start = options.start || 0, end = options.end || 0;
+        const rx = pick(options.r, w), ry = pick(options.r, h || w), 
         // Subtract a small number to prevent cos and sin of start and end
         // from becoming equal on 360 arcs (#1561). The size of the circle
         // affects the constant, therefore the division by `rx`. If the
         // proximity is too small, the arc disappears. If it is too great, a
         // gap appears. This can be seen in the animation of the official
-        // bubble demo (#20586).
-        proximity = 0.0002 / (options.borderRadius ? 1 : Math.max(rx, 1)), fullCircle = (Math.abs((options.end || 0) - start - 2 * Math.PI) <
-            proximity), end = (options.end || 0) - (fullCircle ? proximity : 0), innerRadius = options.innerR, open = pick(options.open, fullCircle), cosStart = Math.cos(start), sinStart = Math.sin(start), cosEnd = Math.cos(end), sinEnd = Math.sin(end), 
+        // bubble demo (#20585).
+        proximity = 0.0002 / (options.borderRadius ? 1 : Math.max(rx, 1)), fullCircle = (Math.abs(end - start - 2 * Math.PI) <
+            proximity);
+        if (fullCircle) {
+            start = Math.PI / 2;
+            end = Math.PI * 2.5 - proximity;
+        }
+        const innerRadius = options.innerR, open = pick(options.open, fullCircle), cosStart = Math.cos(start), sinStart = Math.sin(start), cosEnd = Math.cos(end), sinEnd = Math.sin(end), 
         // Proximity takes care of rounding errors around PI (#6971)
         longArc = pick(options.longArc, end - start - Math.PI < proximity ? 0 : 1);
         let arcSegment = [
@@ -89,7 +95,7 @@ function arc(cx, cy, w, h, options) {
  * Callout shape used for default tooltips.
  */
 function callout(x, y, w, h, options) {
-    const arrowLength = 6, halfDistance = 6, r = Math.min((options && options.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options && options.anchorX, anchorY = options && options.anchorY || 0;
+    const arrowLength = 6, halfDistance = 6, r = Math.min((options?.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options?.anchorX, anchorY = options?.anchorY || 0;
     const path = roundedRect(x, y, w, h, { r });
     if (!isNumber(anchorX)) {
         return path;
@@ -174,7 +180,7 @@ function diamond(x, y, w, h) {
  *
  */
 function rect(x, y, w, h, options) {
-    if (options && options.r) {
+    if (options?.r) {
         return roundedRect(x, y, w, h, options);
     }
     return [

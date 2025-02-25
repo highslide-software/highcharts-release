@@ -1,5 +1,5 @@
 /**
- * @license Highcharts Gantt JS v12.1.2 (2024-12-21)
+ * @license Highcharts Gantt JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/pathfinder
  * @requires highcharts
  *
@@ -11,14 +11,14 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(root["_Highcharts"], root["_Highcharts"]["Chart"], root["_Highcharts"]["Axis"], root["_Highcharts"]["Color"], root["_Highcharts"]["SeriesRegistry"], root["_Highcharts"]["RendererRegistry"], root["_Highcharts"]["SVGRenderer"], root["_Highcharts"]["SVGElement"], root["_Highcharts"]["Point"], root["_Highcharts"]["StackItem"]);
+		module.exports = factory(root["_Highcharts"], root["_Highcharts"]["Chart"], root["_Highcharts"]["Axis"], root["_Highcharts"]["Color"], root["_Highcharts"]["SeriesRegistry"], root["_Highcharts"]["RendererRegistry"], root["_Highcharts"]["SVGRenderer"], root["_Highcharts"]["SVGElement"], root["_Highcharts"]["Templating"], root["_Highcharts"]["Point"], root["_Highcharts"]["StackItem"]);
 	else if(typeof define === 'function' && define.amd)
-		define("highcharts/modules/gantt", ["highcharts/highcharts"], function (amd1) {return factory(amd1,amd1["Chart"],amd1["Axis"],amd1["Color"],amd1["SeriesRegistry"],amd1["RendererRegistry"],amd1["SVGRenderer"],amd1["SVGElement"],amd1["Point"],amd1["StackItem"]);});
+		define("highcharts/modules/gantt", ["highcharts/highcharts"], function (amd1) {return factory(amd1,amd1["Chart"],amd1["Axis"],amd1["Color"],amd1["SeriesRegistry"],amd1["RendererRegistry"],amd1["SVGRenderer"],amd1["SVGElement"],amd1["Templating"],amd1["Point"],amd1["StackItem"]);});
 	else if(typeof exports === 'object')
-		exports["highcharts/modules/gantt"] = factory(root["_Highcharts"], root["_Highcharts"]["Chart"], root["_Highcharts"]["Axis"], root["_Highcharts"]["Color"], root["_Highcharts"]["SeriesRegistry"], root["_Highcharts"]["RendererRegistry"], root["_Highcharts"]["SVGRenderer"], root["_Highcharts"]["SVGElement"], root["_Highcharts"]["Point"], root["_Highcharts"]["StackItem"]);
+		exports["highcharts/modules/gantt"] = factory(root["_Highcharts"], root["_Highcharts"]["Chart"], root["_Highcharts"]["Axis"], root["_Highcharts"]["Color"], root["_Highcharts"]["SeriesRegistry"], root["_Highcharts"]["RendererRegistry"], root["_Highcharts"]["SVGRenderer"], root["_Highcharts"]["SVGElement"], root["_Highcharts"]["Templating"], root["_Highcharts"]["Point"], root["_Highcharts"]["StackItem"]);
 	else
-		root["Highcharts"] = factory(root["Highcharts"], root["Highcharts"]["Chart"], root["Highcharts"]["Axis"], root["Highcharts"]["Color"], root["Highcharts"]["SeriesRegistry"], root["Highcharts"]["RendererRegistry"], root["Highcharts"]["SVGRenderer"], root["Highcharts"]["SVGElement"], root["Highcharts"]["Point"], root["Highcharts"]["StackItem"]);
-})(typeof window === 'undefined' ? this : window, (__WEBPACK_EXTERNAL_MODULE__944__, __WEBPACK_EXTERNAL_MODULE__960__, __WEBPACK_EXTERNAL_MODULE__532__, __WEBPACK_EXTERNAL_MODULE__620__, __WEBPACK_EXTERNAL_MODULE__512__, __WEBPACK_EXTERNAL_MODULE__608__, __WEBPACK_EXTERNAL_MODULE__540__, __WEBPACK_EXTERNAL_MODULE__28__, __WEBPACK_EXTERNAL_MODULE__260__, __WEBPACK_EXTERNAL_MODULE__184__) => {
+		root["Highcharts"] = factory(root["Highcharts"], root["Highcharts"]["Chart"], root["Highcharts"]["Axis"], root["Highcharts"]["Color"], root["Highcharts"]["SeriesRegistry"], root["Highcharts"]["RendererRegistry"], root["Highcharts"]["SVGRenderer"], root["Highcharts"]["SVGElement"], root["Highcharts"]["Templating"], root["Highcharts"]["Point"], root["Highcharts"]["StackItem"]);
+})(typeof window === 'undefined' ? this : window, (__WEBPACK_EXTERNAL_MODULE__944__, __WEBPACK_EXTERNAL_MODULE__960__, __WEBPACK_EXTERNAL_MODULE__532__, __WEBPACK_EXTERNAL_MODULE__620__, __WEBPACK_EXTERNAL_MODULE__512__, __WEBPACK_EXTERNAL_MODULE__608__, __WEBPACK_EXTERNAL_MODULE__540__, __WEBPACK_EXTERNAL_MODULE__28__, __WEBPACK_EXTERNAL_MODULE__984__, __WEBPACK_EXTERNAL_MODULE__260__, __WEBPACK_EXTERNAL_MODULE__184__) => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
@@ -83,6 +83,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__512__;
 /***/ ((module) => {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE__184__;
+
+/***/ }),
+
+/***/ 984:
+/***/ ((module) => {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__984__;
 
 /***/ }),
 
@@ -1453,7 +1460,7 @@ const NavigatorDefaults = {
      * @sample {highstock} stock/navigator/margin/
      *         A margin of 2 draws the navigator closer to the X axis labels
      */
-    margin: 25,
+    margin: 22,
     /**
      * Whether the mask should be inside the range marking the zoomed
      * range, or outside. In Highcharts Stock 1.x it was always `false`.
@@ -1861,7 +1868,7 @@ const NavigatorDefaults = {
         },
         crosshair: false,
         title: {
-            text: null
+            text: void 0
         },
         tickLength: 0,
         tickWidth: 0
@@ -1917,15 +1924,21 @@ const { defined: Symbols_defined, isNumber: Symbols_isNumber, pick: Symbols_pick
 function arc(cx, cy, w, h, options) {
     const arc = [];
     if (options) {
-        const start = options.start || 0, rx = Symbols_pick(options.r, w), ry = Symbols_pick(options.r, h || w), 
+        let start = options.start || 0, end = options.end || 0;
+        const rx = Symbols_pick(options.r, w), ry = Symbols_pick(options.r, h || w), 
         // Subtract a small number to prevent cos and sin of start and end
         // from becoming equal on 360 arcs (#1561). The size of the circle
         // affects the constant, therefore the division by `rx`. If the
         // proximity is too small, the arc disappears. If it is too great, a
         // gap appears. This can be seen in the animation of the official
-        // bubble demo (#20586).
-        proximity = 0.0002 / (options.borderRadius ? 1 : Math.max(rx, 1)), fullCircle = (Math.abs((options.end || 0) - start - 2 * Math.PI) <
-            proximity), end = (options.end || 0) - (fullCircle ? proximity : 0), innerRadius = options.innerR, open = Symbols_pick(options.open, fullCircle), cosStart = Math.cos(start), sinStart = Math.sin(start), cosEnd = Math.cos(end), sinEnd = Math.sin(end), 
+        // bubble demo (#20585).
+        proximity = 0.0002 / (options.borderRadius ? 1 : Math.max(rx, 1)), fullCircle = (Math.abs(end - start - 2 * Math.PI) <
+            proximity);
+        if (fullCircle) {
+            start = Math.PI / 2;
+            end = Math.PI * 2.5 - proximity;
+        }
+        const innerRadius = options.innerR, open = Symbols_pick(options.open, fullCircle), cosStart = Math.cos(start), sinStart = Math.sin(start), cosEnd = Math.cos(end), sinEnd = Math.sin(end), 
         // Proximity takes care of rounding errors around PI (#6971)
         longArc = Symbols_pick(options.longArc, end - start - Math.PI < proximity ? 0 : 1);
         let arcSegment = [
@@ -1984,7 +1997,7 @@ function arc(cx, cy, w, h, options) {
  * Callout shape used for default tooltips.
  */
 function callout(x, y, w, h, options) {
-    const arrowLength = 6, halfDistance = 6, r = Math.min((options && options.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options && options.anchorX, anchorY = options && options.anchorY || 0;
+    const arrowLength = 6, halfDistance = 6, r = Math.min((options?.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options?.anchorX, anchorY = options?.anchorY || 0;
     const path = roundedRect(x, y, w, h, { r });
     if (!Symbols_isNumber(anchorX)) {
         return path;
@@ -2069,7 +2082,7 @@ function diamond(x, y, w, h) {
  *
  */
 function rect(x, y, w, h, options) {
-    if (options && options.r) {
+    if (options?.r) {
         return roundedRect(x, y, w, h, options);
     }
     return [
@@ -2348,8 +2361,8 @@ var ScrollbarAxis;
     ScrollbarAxis.compose = compose;
     /** @private */
     function getExtremes(axis) {
-        const axisMin = ScrollbarAxis_pick(axis.options && axis.options.min, axis.min);
-        const axisMax = ScrollbarAxis_pick(axis.options && axis.options.max, axis.max);
+        const axisMin = ScrollbarAxis_pick(axis.options?.min, axis.min);
+        const axisMax = ScrollbarAxis_pick(axis.options?.max, axis.max);
         return {
             axisMin,
             axisMax,
@@ -2378,9 +2391,7 @@ var ScrollbarAxis;
      */
     function onAxisAfterInit() {
         const axis = this;
-        if (axis.options &&
-            axis.options.scrollbar &&
-            axis.options.scrollbar.enabled) {
+        if (axis.options?.scrollbar?.enabled) {
             // Predefined options:
             axis.options.scrollbar.vertical = !axis.horiz;
             axis.options.startOnTick = axis.options.endOnTick = false;
@@ -2606,7 +2617,7 @@ const ScrollbarDefaults = {
     /**
      * The margin between the scrollbar and its axis when the scrollbar is
      * applied directly to an axis, or the navigator in case that is enabled.
-     * Defaults to 10 for axis, 0 for navigator.
+     * Defaults to 10 for axis, 3 for navigator.
      *
      * @type {number|undefined}
      */
@@ -4397,9 +4408,9 @@ class Navigator {
             navigator.xAxis.navigatorAxis.toFixedRange = (NavigatorAxisComposition.prototype.toFixedRange.bind(navigator.xAxis.navigatorAxis));
         }
         // Initialize the scrollbar
-        if (chart.options.scrollbar.enabled) {
+        if (chart.options.scrollbar?.enabled) {
             const options = Navigator_merge(chart.options.scrollbar, { vertical: chart.inverted });
-            if (!Navigator_isNumber(options.margin) && navigator.navigatorEnabled) {
+            if (!Navigator_isNumber(options.margin)) {
                 options.margin = chart.inverted ? -3 : 3;
             }
             chart.scrollbar = navigator.scrollbar = new Scrollbar_Scrollbar(chart.renderer, options, chart);
@@ -4828,10 +4839,10 @@ class Navigator {
                 marginName = navigator.opposite ?
                     'marginRight' : 'plotLeft';
             }
-            chart[marginName] =
-                (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
-                    navigator.height + navigator.scrollbarHeight :
-                    0) + navigator.navigatorOptions.margin;
+            chart[marginName] = (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
+                navigator.height +
+                    (this.scrollbar?.options.margin || 0) +
+                    navigator.scrollbarHeight : 0) + (navigator.navigatorOptions.margin || 0);
         }), Navigator_addEvent(Navigator, 'setRange', function (e) {
             this.chart.xAxis[0].setExtremes(e.min, e.max, e.redraw, e.animation, e.eventArguments);
         }));
@@ -4935,7 +4946,22 @@ const lang = {
      *
      * @product highstock gantt
      */
-    rangeSelectorTo: '→'
+    rangeSelectorTo: '→',
+    /**
+     * The default text for the rangeselector buttons.
+     *
+     * @since next
+     */
+    rangeSelector: {
+        allText: 'All',
+        allTitle: 'View all',
+        monthText: '{count}m',
+        monthTitle: 'View {count} {#eq count 1}month{else}months{/eq}',
+        yearText: '{count}y',
+        yearTitle: 'View {count} {#eq count 1}year{else}years{/eq}',
+        ytdText: 'YTD',
+        ytdTitle: 'View year to date'
+    }
 };
 /**
  * The range selector is a tool for selecting ranges to display within
@@ -5002,32 +5028,20 @@ const rangeSelector = {
      */
     buttons: [{
             type: 'month',
-            count: 1,
-            text: '1m',
-            title: 'View 1 month'
+            count: 1
         }, {
             type: 'month',
-            count: 3,
-            text: '3m',
-            title: 'View 3 months'
+            count: 3
         }, {
             type: 'month',
-            count: 6,
-            text: '6m',
-            title: 'View 6 months'
+            count: 6
         }, {
-            type: 'ytd',
-            text: 'YTD',
-            title: 'View year to date'
+            type: 'ytd'
         }, {
             type: 'year',
-            count: 1,
-            text: '1y',
-            title: 'View 1 year'
+            count: 1
         }, {
-            type: 'all',
-            text: 'All',
-            title: 'View all'
+            type: 'all'
         }],
     /**
      * How many units of the defined type the button should span. If `type`
@@ -5710,6 +5724,124 @@ const RangeSelectorComposition = {
 // EXTERNAL MODULE: external {"amd":["highcharts/highcharts","SVGElement"],"commonjs":["highcharts","SVGElement"],"commonjs2":["highcharts","SVGElement"],"root":["Highcharts","SVGElement"]}
 var highcharts_SVGElement_commonjs_highcharts_SVGElement_commonjs2_highcharts_SVGElement_root_Highcharts_SVGElement_ = __webpack_require__(28);
 var highcharts_SVGElement_commonjs_highcharts_SVGElement_commonjs2_highcharts_SVGElement_root_Highcharts_SVGElement_default = /*#__PURE__*/__webpack_require__.n(highcharts_SVGElement_commonjs_highcharts_SVGElement_commonjs2_highcharts_SVGElement_root_Highcharts_SVGElement_);
+// EXTERNAL MODULE: external {"amd":["highcharts/highcharts","Templating"],"commonjs":["highcharts","Templating"],"commonjs2":["highcharts","Templating"],"root":["Highcharts","Templating"]}
+var highcharts_Templating_commonjs_highcharts_Templating_commonjs2_highcharts_Templating_root_Highcharts_Templating_ = __webpack_require__(984);
+var highcharts_Templating_commonjs_highcharts_Templating_commonjs2_highcharts_Templating_root_Highcharts_Templating_default = /*#__PURE__*/__webpack_require__.n(highcharts_Templating_commonjs_highcharts_Templating_commonjs2_highcharts_Templating_root_Highcharts_Templating_);
+;// ./code/es-modules/Data/ColumnUtils.js
+/* *
+ *
+ *  (c) 2020-2024 Highsoft AS
+ *
+ *  License: www.highcharts.com/license
+ *
+ *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+ *
+ *  Authors:
+ *  - Dawid Dragula
+ *
+ * */
+/**
+ * Utility functions for columns that can be either arrays or typed arrays.
+ * @private
+ */
+var ColumnUtils;
+(function (ColumnUtils) {
+    /* *
+    *
+    *  Declarations
+    *
+    * */
+    /* *
+    *
+    * Functions
+    *
+    * */
+    /**
+     * Sets the length of the column array.
+     *
+     * @param {DataTable.Column} column
+     * Column to be modified.
+     *
+     * @param {number} length
+     * New length of the column.
+     *
+     * @param {boolean} asSubarray
+     * If column is a typed array, return a subarray instead of a new array. It
+     * is faster `O(1)`, but the entire buffer will be kept in memory until all
+     * views to it are destroyed. Default is `false`.
+     *
+     * @return {DataTable.Column}
+     * Modified column.
+     *
+     * @private
+     */
+    function setLength(column, length, asSubarray) {
+        if (Array.isArray(column)) {
+            column.length = length;
+            return column;
+        }
+        return column[asSubarray ? 'subarray' : 'slice'](0, length);
+    }
+    ColumnUtils.setLength = setLength;
+    /**
+     * Splices a column array.
+     *
+     * @param {DataTable.Column} column
+     * Column to be modified.
+     *
+     * @param {number} start
+     * Index at which to start changing the array.
+     *
+     * @param {number} deleteCount
+     * An integer indicating the number of old array elements to remove.
+     *
+     * @param {boolean} removedAsSubarray
+     * If column is a typed array, return a subarray instead of a new array. It
+     * is faster `O(1)`, but the entire buffer will be kept in memory until all
+     * views to it are destroyed. Default is `true`.
+     *
+     * @param {Array<number>|TypedArray} items
+     * The elements to add to the array, beginning at the start index. If you
+     * don't specify any elements, `splice()` will only remove elements from the
+     * array.
+     *
+     * @return {SpliceResult}
+     * Object containing removed elements and the modified column.
+     *
+     * @private
+     */
+    function splice(column, start, deleteCount, removedAsSubarray, items = []) {
+        if (Array.isArray(column)) {
+            if (!Array.isArray(items)) {
+                items = Array.from(items);
+            }
+            return {
+                removed: column.splice(start, deleteCount, ...items),
+                array: column
+            };
+        }
+        const Constructor = Object.getPrototypeOf(column)
+            .constructor;
+        const removed = column[removedAsSubarray ? 'subarray' : 'slice'](start, start + deleteCount);
+        const newLength = column.length - deleteCount + items.length;
+        const result = new Constructor(newLength);
+        result.set(column.subarray(0, start), 0);
+        result.set(items, start);
+        result.set(column.subarray(start + deleteCount), start + items.length);
+        return {
+            removed: removed,
+            array: result
+        };
+    }
+    ColumnUtils.splice = splice;
+})(ColumnUtils || (ColumnUtils = {}));
+/* *
+ *
+ *  Default Export
+ *
+ * */
+/* harmony default export */ const Data_ColumnUtils = (ColumnUtils);
+
 ;// ./code/es-modules/Data/DataTableCore.js
 /* *
  *
@@ -5727,7 +5859,9 @@ var highcharts_SVGElement_commonjs_highcharts_SVGElement_commonjs2_highcharts_SV
  * */
 
 
-const { fireEvent: DataTableCore_fireEvent, isArray: DataTableCore_isArray, objectEach: DataTableCore_objectEach, uniqueKey } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
+const { setLength, splice } = Data_ColumnUtils;
+
+const { fireEvent: DataTableCore_fireEvent, objectEach: DataTableCore_objectEach, uniqueKey } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
 /* *
  *
  *  Class
@@ -5771,7 +5905,7 @@ class DataTableCore {
         this.autoId = !options.id;
         this.columns = {};
         /**
-         * ID of the table for indentification purposes.
+         * ID of the table for identification purposes.
          *
          * @name Highcharts.DataTable#id
          * @type {string}
@@ -5801,11 +5935,38 @@ class DataTableCore {
      */
     applyRowCount(rowCount) {
         this.rowCount = rowCount;
-        DataTableCore_objectEach(this.columns, (column) => {
-            if (DataTableCore_isArray(column)) { // Not on typed array
-                column.length = rowCount;
+        DataTableCore_objectEach(this.columns, (column, columnName) => {
+            if (column.length !== rowCount) {
+                this.columns[columnName] = setLength(column, rowCount);
             }
         });
+    }
+    /**
+     * Delete rows. Simplified version of the full
+     * `DataTable.deleteRows` method.
+     *
+     * @param {number} rowIndex
+     * The start row index
+     *
+     * @param {number} [rowCount=1]
+     * The number of rows to delete
+     *
+     * @return {void}
+     *
+     * @emits #afterDeleteRows
+     */
+    deleteRows(rowIndex, rowCount = 1) {
+        if (rowCount > 0 && rowIndex < this.rowCount) {
+            let length = 0;
+            DataTableCore_objectEach(this.columns, (column, columnName) => {
+                this.columns[columnName] =
+                    splice(column, rowIndex, rowCount).array;
+                length = column.length;
+            });
+            this.rowCount = length;
+        }
+        DataTableCore_fireEvent(this, 'afterDeleteRows', { rowIndex, rowCount });
+        this.versionTag = uniqueKey();
     }
     /**
      * Fetches the given column by the canonical column name. Simplified version
@@ -5865,7 +6026,7 @@ class DataTableCore {
      * @param {Highcharts.DataTableColumn} [column]
      * Values to set in the column.
      *
-     * @param {number} [rowIndex=0]
+     * @param {number} [rowIndex]
      * Index of the first row to change. (Default: 0)
      *
      * @param {Record<string, (boolean|number|string|null|undefined)>} [eventDetail]
@@ -5878,15 +6039,16 @@ class DataTableCore {
         this.setColumns({ [columnName]: column }, rowIndex, eventDetail);
     }
     /**
-     * * Sets cell values for multiple columns. Will insert new columns, if not
-     * found. Simplified version of the full `DataTable.setColumns`, limited to
-     * full replacement of the columns (undefined `rowIndex`).
+     * Sets cell values for multiple columns. Will insert new columns, if not
+     * found. Simplified version of the full `DataTableCore.setColumns`, limited
+     * to full replacement of the columns (undefined `rowIndex`).
      *
      * @param {Highcharts.DataTableColumnCollection} columns
      * Columns as a collection, where the keys are the column names.
      *
      * @param {number} [rowIndex]
-     * Index of the first row to change. Keep undefined to reset.
+     * Index of the first row to change. Ignored in the `DataTableCore`, as it
+     * always replaces the full column.
      *
      * @param {Record<string, (boolean|number|string|null|undefined)>} [eventDetail]
      * Custom information for pending events.
@@ -5915,7 +6077,7 @@ class DataTableCore {
      * Cell values to set.
      *
      * @param {number} [rowIndex]
-     * Index of the row to set. Leave `undefind` to add as a new row.
+     * Index of the row to set. Leave `undefined` to add as a new row.
      *
      * @param {boolean} [insert]
      * Whether to insert the row at the given index, or to overwrite the row.
@@ -5928,11 +6090,11 @@ class DataTableCore {
     setRow(row, rowIndex = this.rowCount, insert, eventDetail) {
         const { columns } = this, indexRowCount = insert ? this.rowCount + 1 : rowIndex + 1;
         DataTableCore_objectEach(row, (cellValue, columnName) => {
-            const column = columns[columnName] ||
+            let column = columns[columnName] ||
                 eventDetail?.addColumns !== false && new Array(indexRowCount);
             if (column) {
                 if (insert) {
-                    column.splice(rowIndex, 0, cellValue);
+                    column = splice(column, rowIndex, 0, true, [cellValue]).array;
                 }
                 else {
                     column[rowIndex] = cellValue;
@@ -5961,8 +6123,11 @@ class DataTableCore {
  *
  * */
 /**
+ * A typed array.
+ * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} Highcharts.TypedArray
+ * //**
  * A column of values in a data table.
- * @typedef {Array<boolean|null|number|string|undefined>} Highcharts.DataTableColumn
+ * @typedef {Array<boolean|null|number|string|undefined>|Highcharts.TypedArray} Highcharts.DataTableColumn
  */ /**
 * A collection of data table columns defined by a object where the key is the
 * column name and the value is an array of the column values.
@@ -6365,7 +6530,7 @@ var OrdinalAxis;
             // On touch devices, let default function handle the pinching
             (!e.touches || e.touches.length <= 1)) {
             const mouseDownX = chart.mouseDownX, extremes = xAxis.getExtremes(), dataMin = extremes.dataMin, dataMax = extremes.dataMax, min = extremes.min, max = extremes.max, hoverPoints = chart.hoverPoints, closestPointRange = (xAxis.closestPointRange ||
-                (xAxis.ordinal && xAxis.ordinal.overscrollPointsRange)), pointPixelWidth = (xAxis.translationSlope *
+                xAxis.ordinal?.overscrollPointsRange), pointPixelWidth = (xAxis.translationSlope *
                 (xAxis.ordinal.slope || closestPointRange)), 
             // How many ordinal units did we move?
             movedUnits = Math.round((mouseDownX - chartX) / pointPixelWidth), 
@@ -6445,7 +6610,7 @@ var OrdinalAxis;
         const xAxis = this.xAxis;
         // Destroy the extended ordinal index on updated data
         // and destroy extendedOrdinalPositions, #16055.
-        if (xAxis && xAxis.options.ordinal) {
+        if (xAxis?.options.ordinal) {
             delete xAxis.ordinal.index;
             delete xAxis.ordinal.originalOrdinalRange;
         }
@@ -6479,10 +6644,8 @@ var OrdinalAxis;
             // Final return value is based on ordinalIndex
         }
         else {
-            extendedOrdinalPositions =
-                ordinal.getExtendedPositions &&
-                    ordinal.getExtendedPositions();
-            if (!(extendedOrdinalPositions && extendedOrdinalPositions.length)) {
+            extendedOrdinalPositions = ordinal.getExtendedPositions?.();
+            if (!extendedOrdinalPositions?.length) {
                 return val;
             }
             const length = extendedOrdinalPositions.length;
@@ -6973,7 +7136,7 @@ var OrdinalAxis;
             return ret;
         }
         /**
-         * If overscroll is pixel or pecentage value, convert it to axis range.
+         * If overscroll is pixel or percentage value, convert it to axis range.
          *
          * @private
          * @param {number | string} overscroll
@@ -6988,6 +7151,16 @@ var OrdinalAxis;
             };
             if (isString(overscroll)) {
                 const overscrollValue = parseInt(overscroll, 10);
+                let isFullRange;
+                // #22334
+                if (OrdinalAxis_defined(axis.min) && OrdinalAxis_defined(axis.max) &&
+                    OrdinalAxis_defined(axis.dataMin) && OrdinalAxis_defined(axis.dataMax)) {
+                    isFullRange =
+                        axis.max - axis.min === axis.dataMax - axis.dataMin;
+                    if (!isFullRange) {
+                        this.originalOrdinalRange = axis.max - axis.min;
+                    }
+                }
                 if (/%$/.test(overscroll)) {
                     // If overscroll is percentage
                     return calculateOverscroll(overscrollValue / 100);
@@ -6996,7 +7169,8 @@ var OrdinalAxis;
                     // If overscroll is pixels, it is limited to 90% of the axis
                     // length to prevent division by zero
                     const limitedOverscrollValue = Math.min(overscrollValue, axis.len * 0.9), pixelToPercent = limitedOverscrollValue / axis.len;
-                    return calculateOverscroll(pixelToPercent / (1 - pixelToPercent));
+                    return calculateOverscroll(pixelToPercent /
+                        (isFullRange ? (1 - pixelToPercent) : 1));
                 }
                 // If overscroll is a string but not pixels or percentage,
                 // return 0 as no overscroll
@@ -7031,6 +7205,8 @@ const { defaultOptions: RangeSelector_defaultOptions } = (highcharts_commonjs_hi
 
 
 
+
+const { format } = (highcharts_Templating_commonjs_highcharts_Templating_commonjs2_highcharts_Templating_root_Highcharts_Templating_default());
 
 
 const { addEvent: RangeSelector_addEvent, createElement, css: RangeSelector_css, defined: RangeSelector_defined, destroyObjectProperties: RangeSelector_destroyObjectProperties, diffObjects, discardElement, extend: RangeSelector_extend, fireEvent: RangeSelector_fireEvent, isNumber: RangeSelector_isNumber, isString: RangeSelector_isString, merge: RangeSelector_merge, objectEach: RangeSelector_objectEach, pick: RangeSelector_pick, splat: RangeSelector_splat } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
@@ -7104,7 +7280,7 @@ class RangeSelector {
      * */
     constructor(chart) {
         this.isDirty = false;
-        this.buttonOptions = RangeSelector.prototype.defaultButtons;
+        this.buttonOptions = [];
         this.initialButtonGroupWidth = 0;
         this.maxButtonWidth = () => {
             let buttonWidth = 0;
@@ -7284,7 +7460,7 @@ class RangeSelector {
      * @param {Highcharts.Chart} chart
      */
     init(chart) {
-        const rangeSelector = this, options = chart.options.rangeSelector, buttonOptions = options.buttons, selectedOption = options.selected, blurInputs = function () {
+        const rangeSelector = this, options = chart.options.rangeSelector, langOptions = chart.options.lang, buttonOptions = options.buttons, selectedOption = options.selected, blurInputs = function () {
             const minInput = rangeSelector.minInput, maxInput = rangeSelector.maxInput;
             // #3274 in some case blur is not defined
             if (minInput && !!minInput.blur) {
@@ -7297,7 +7473,20 @@ class RangeSelector {
         rangeSelector.chart = chart;
         rangeSelector.options = options;
         rangeSelector.buttons = [];
-        rangeSelector.buttonOptions = buttonOptions;
+        rangeSelector.buttonOptions = buttonOptions
+            .map((opt) => {
+            if (opt.type && langOptions.rangeSelector) {
+                opt.text ?? (opt.text = langOptions.rangeSelector[`${opt.type}Text`]);
+                opt.title ?? (opt.title = langOptions.rangeSelector[`${opt.type}Title`]);
+            }
+            opt.text = format(opt.text, {
+                count: opt.count || 1
+            });
+            opt.title = format(opt.title, {
+                count: opt.count || 1
+            });
+            return opt;
+        });
         this.eventsToUnbind = [];
         this.eventsToUnbind.push(RangeSelector_addEvent(chart.container, 'mousedown', blurInputs));
         this.eventsToUnbind.push(RangeSelector_addEvent(chart, 'resize', blurInputs));
@@ -7998,7 +8187,7 @@ class RangeSelector {
             textContent: rangeOptions.title || rangeOptions.text
         }), i + 2);
         buttons[i] = renderer
-            .button(rangeOptions.text, 0, 0, (e) => {
+            .button(rangeOptions.text ?? '', 0, 0, (e) => {
             // Extract events from button object and call
             const buttonEvents = (rangeOptions.events && rangeOptions.events.click);
             let callDefaultEvent;
@@ -10519,7 +10708,7 @@ const StaticScale = {
 
 ;// ./code/es-modules/masters/modules/static-scale.src.js
 /**
- * @license Highcharts Gantt JS v12.1.2 (2024-12-21)
+ * @license Highcharts Gantt JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/static-scale
  * @requires highcharts
  *
@@ -10798,7 +10987,7 @@ class XRangePoint extends ColumnPoint {
     static getColorByCategory(series, point) {
         const colors = series.options.colors || series.chart.options.colors, colorCount = colors ?
             colors.length :
-            series.chart.options.chart.colorCount, colorIndex = point.y % colorCount, color = colors && colors[colorIndex];
+            series.chart.options.chart.colorCount, colorIndex = point.y % colorCount, color = colors?.[colorIndex];
         return {
             colorIndex: colorIndex,
             color: color
@@ -11058,7 +11247,7 @@ class XRangeSeries extends ColumnSeries {
     }
     alignDataLabel(point) {
         const oldPlotX = point.plotX;
-        point.plotX = XRangeSeries_pick(point.dlBox && point.dlBox.centerX, point.plotX);
+        point.plotX = XRangeSeries_pick(point.dlBox?.centerX, point.plotX);
         if (point.dataLabel && point.shapeArgs?.width) {
             point.dataLabel.css({
                 width: `${point.shapeArgs.width}px`
@@ -11071,7 +11260,7 @@ class XRangeSeries extends ColumnSeries {
      * @private
      */
     translatePoint(point) {
-        const xAxis = this.xAxis, yAxis = this.yAxis, metrics = this.columnMetrics, options = this.options, minPointLength = options.minPointLength || 0, oldColWidth = (point.shapeArgs && point.shapeArgs.width || 0) / 2, seriesXOffset = this.pointXOffset = metrics.offset, posX = XRangeSeries_pick(point.x2, point.x + (point.len || 0)), borderRadius = options.borderRadius, plotTop = this.chart.plotTop, plotLeft = this.chart.plotLeft;
+        const xAxis = this.xAxis, yAxis = this.yAxis, metrics = this.columnMetrics, options = this.options, minPointLength = options.minPointLength || 0, oldColWidth = (point.shapeArgs?.width || 0) / 2, seriesXOffset = this.pointXOffset = metrics.offset, posX = XRangeSeries_pick(point.x2, point.x + (point.len || 0)), borderRadius = options.borderRadius, plotTop = this.chart.plotTop, plotLeft = this.chart.plotLeft;
         let plotX = point.plotX, plotX2 = xAxis.translate(posX, 0, 0, 0, 1);
         const length = Math.abs(plotX2 - plotX), inverted = this.chart.inverted, borderWidth = XRangeSeries_pick(options.borderWidth, 1);
         let widthDifference, partialFill, yOffset = metrics.offset, pointHeight = Math.round(metrics.width), dlLeft, dlRight, dlWidth, clipRectWidth;
@@ -11330,7 +11519,7 @@ highcharts_SeriesRegistry_commonjs_highcharts_SeriesRegistry_commonjs2_highchart
 
 ;// ./code/es-modules/masters/modules/xrange.src.js
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/xrange
  * @requires highcharts
  *
@@ -11987,7 +12176,7 @@ var BrokenAxis;
         static lin2Val(val) {
             const axis = this;
             const brokenAxis = axis.brokenAxis;
-            const breakArray = brokenAxis && brokenAxis.breakArray;
+            const breakArray = brokenAxis?.breakArray;
             if (!breakArray || !BrokenAxis_isNumber(val)) {
                 return val;
             }
@@ -12012,7 +12201,7 @@ var BrokenAxis;
         static val2Lin(val) {
             const axis = this;
             const brokenAxis = axis.brokenAxis;
-            const breakArray = brokenAxis && brokenAxis.breakArray;
+            const breakArray = brokenAxis?.breakArray;
             if (!breakArray || !BrokenAxis_isNumber(val)) {
                 return val;
             }
@@ -12461,7 +12650,7 @@ function onAfterGetTitlePosition(e) {
         // Compute anchor points for each of the title align options
         const { axisTitle, height: axisHeight, horiz, left: axisLeft, offset, opposite, options, top: axisTop, width: axisWidth } = axis;
         const tickSize = axis.tickSize();
-        const titleWidth = axisTitle && axisTitle.getBBox().width;
+        const titleWidth = axisTitle?.getBBox().width;
         const xOption = options.title.x;
         const yOption = options.title.y;
         const titleMargin = GridAxis_pick(options.title.margin, horiz ? 5 : 10);
@@ -12563,7 +12752,7 @@ function onAfterRender() {
                     > _________________________
         Into this:    |______|______|______|__|
                                                 */
-        if (axis.grid && axis.grid.isOuterAxis() && axis.axisLine) {
+        if (axis.grid?.isOuterAxis() && axis.axisLine) {
             const lineWidth = options.lineWidth;
             if (lineWidth) {
                 const linePath = axis.getLinePath(lineWidth), startPoint = linePath[0], endPoint = linePath[1], 
@@ -12647,13 +12836,12 @@ function onAfterRender() {
                 axis.axisLine[axis.showAxis ? 'show' : 'hide']();
             }
         }
-        (grid && grid.columns || []).forEach((column) => column.render());
+        (grid?.columns || []).forEach((column) => column.render());
         // Manipulate the tick mark visibility
         // based on the axis.max- allows smooth scrolling.
         if (!axis.horiz &&
             axis.chart.hasRendered &&
-            (axis.scrollbar ||
-                (axis.linkedParent && axis.linkedParent.scrollbar)) &&
+            (axis.scrollbar || axis.linkedParent?.scrollbar) &&
             axis.tickPositions.length) {
             const tickmarkOffset = axis.tickmarkOffset, lastTick = axis.tickPositions[axis.tickPositions.length - 1], firstTick = axis.tickPositions[0];
             let label, tickMark;
@@ -12698,7 +12886,7 @@ function onAfterRender() {
  */
 function onAfterSetAxisTranslation() {
     const axis = this;
-    const tickInfo = axis.tickPositions && axis.tickPositions.info;
+    const tickInfo = axis.tickPositions?.info;
     const options = axis.options;
     const gridOptions = options.grid || {};
     const userLabels = axis.userOptions.labels || {};
@@ -12834,9 +13022,7 @@ function onAfterSetOptions(e) {
                 !GridAxis_defined(userOptions.tickInterval) &&
                 !GridAxis_defined(userOptions.units)) {
                 gridAxisOptions.tickPositioner = function (min, max) {
-                    const parentInfo = (this.linkedParent &&
-                        this.linkedParent.tickPositions &&
-                        this.linkedParent.tickPositions.info);
+                    const parentInfo = this.linkedParent?.tickPositions?.info;
                     if (parentInfo) {
                         const units = (gridAxisOptions.units || []);
                         let unitIdx, count = 1, unitName = 'year';
@@ -12852,7 +13038,7 @@ function onAfterSetOptions(e) {
                         if (unit) {
                             unitName = unit[0] || 'year';
                             const counts = unit[1];
-                            count = counts && counts[0] || 1;
+                            count = counts?.[0] || 1;
                             // In case the base X axis shows years, make the
                             // secondary axis show ten times the years (#11427)
                         }
@@ -12893,7 +13079,7 @@ function onAfterSetOptions(e) {
 function onAfterSetOptions2(e) {
     const axis = this;
     const userOptions = e.userOptions;
-    const gridOptions = userOptions && userOptions.grid || {};
+    const gridOptions = userOptions?.grid || {};
     const columns = gridOptions.columns;
     // Add column options to the parent axis. Children has their column options
     // set on init in onGridAxisAfterInit.
@@ -12935,7 +13121,7 @@ function onAfterTickSize(e) {
  */
 function GridAxis_onChartAfterSetChartSize() {
     this.axes.forEach((axis) => {
-        (axis.grid && axis.grid.columns || []).forEach((column) => {
+        (axis.grid?.columns || []).forEach((column) => {
             column.setAxisSize();
             column.setAxisTranslation();
         });
@@ -13051,8 +13237,7 @@ function onTickAfterGetLabelPosition(e) {
  */
 function onTickLabelFormat(ctx) {
     const { axis, value } = ctx;
-    if (axis.options.grid &&
-        axis.options.grid.enabled) {
+    if (axis.options.grid?.enabled) {
         const tickPos = axis.tickPositions;
         const series = (axis.linkedParent || axis).series[0];
         const isFirst = value === tickPos[0];
@@ -13095,7 +13280,7 @@ function onTickLabelFormat(ctx) {
  *       ticks and not the labels directly?
  */
 function onTrimTicks() {
-    const axis = this, options = axis.options, gridOptions = options.grid || {}, categoryAxis = axis.categories, tickPositions = axis.tickPositions, firstPos = tickPositions[0], secondPos = tickPositions[1], lastPos = tickPositions[tickPositions.length - 1], beforeLastPos = tickPositions[tickPositions.length - 2], linkedMin = axis.linkedParent && axis.linkedParent.min, linkedMax = axis.linkedParent && axis.linkedParent.max, min = linkedMin || axis.min, max = linkedMax || axis.max, tickInterval = axis.tickInterval, startLessThanMin = ( // #19845
+    const axis = this, options = axis.options, gridOptions = options.grid || {}, categoryAxis = axis.categories, tickPositions = axis.tickPositions, firstPos = tickPositions[0], secondPos = tickPositions[1], lastPos = tickPositions[tickPositions.length - 1], beforeLastPos = tickPositions[tickPositions.length - 2], linkedMin = axis.linkedParent?.min, linkedMax = axis.linkedParent?.max, min = linkedMin || axis.min, max = linkedMax || axis.max, tickInterval = axis.tickInterval, startLessThanMin = ( // #19845
     GridAxis_isNumber(min) &&
         min >= firstPos + tickInterval &&
         min < secondPos), endMoreThanMin = (GridAxis_isNumber(min) &&
@@ -13544,7 +13729,7 @@ function renderLabelIcon(tick, params) {
  * @private
  */
 function wrapGetLabelPosition(proceed, x, y, label, horiz, labelOptions, tickmarkOffset, index, step) {
-    const tick = this, lbOptions = TreeGridTick_pick(tick.options && tick.options.labels, labelOptions), pos = tick.pos, axis = tick.axis, isTreeGrid = axis.type === 'treegrid', result = proceed.apply(tick, [x, y, label, horiz, lbOptions, tickmarkOffset, index, step]);
+    const tick = this, lbOptions = TreeGridTick_pick(tick.options?.labels, labelOptions), pos = tick.pos, axis = tick.axis, isTreeGrid = axis.type === 'treegrid', result = proceed.apply(tick, [x, y, label, horiz, lbOptions, tickmarkOffset, index, step]);
     let mapOfPosToGridNode, node, level;
     if (isTreeGrid) {
         const { width = 0, padding = axis.linkedParent ? 0 : 5 } = (lbOptions && TreeGridTick_isObject(lbOptions.symbol, true) ?
@@ -13553,8 +13738,8 @@ function wrapGetLabelPosition(proceed, x, y, label, horiz, labelOptions, tickmar
             lbOptions.indentation :
             0);
         mapOfPosToGridNode = axis.treeGrid.mapOfPosToGridNode;
-        node = mapOfPosToGridNode && mapOfPosToGridNode[pos];
-        level = (node && node.depth) || 1;
+        node = mapOfPosToGridNode?.[pos];
+        level = node?.depth || 1;
         result.x += (
         // Add space for symbols
         (width + (padding * 2)) +
@@ -13569,7 +13754,7 @@ function wrapGetLabelPosition(proceed, x, y, label, horiz, labelOptions, tickmar
 function wrapRenderLabel(proceed) {
     const tick = this, { pos, axis, label, treeGrid: tickGrid, options: tickOptions } = tick, icon = tickGrid?.labelIcon, labelElement = label?.element, { treeGrid: axisGrid, options: axisOptions, chart, tickPositions } = axis, mapOfPosToGridNode = axisGrid.mapOfPosToGridNode, labelOptions = TreeGridTick_pick(tickOptions?.labels, axisOptions?.labels), symbolOptions = (labelOptions && TreeGridTick_isObject(labelOptions.symbol, true) ?
         labelOptions.symbol :
-        {}), node = mapOfPosToGridNode && mapOfPosToGridNode[pos], { descendants, depth } = node || {}, hasDescendants = node && descendants && descendants > 0, level = depth, isTreeGridElement = (axis.type === 'treegrid') && labelElement, shouldRender = tickPositions.indexOf(pos) > -1, prefixClassName = 'highcharts-treegrid-node-', prefixLevelClass = prefixClassName + 'level-', styledMode = chart.styledMode;
+        {}), node = mapOfPosToGridNode?.[pos], { descendants, depth } = node || {}, hasDescendants = node && descendants && descendants > 0, level = depth, isTreeGridElement = (axis.type === 'treegrid') && labelElement, shouldRender = tickPositions.indexOf(pos) > -1, prefixClassName = 'highcharts-treegrid-node-', prefixLevelClass = prefixClassName + 'level-', styledMode = chart.styledMode;
     let collapsed, addClassName, removeClassName;
     if (isTreeGridElement && node) {
         // Add class name for hierarchical styling.
@@ -14205,8 +14390,7 @@ function onBeforeRender(e) {
                     seriesData.forEach(function (pointOptions) {
                         // For using keys, or when using primitive points,
                         // rebuild the data structure
-                        if (foundPrimitivePoint ||
-                            (s.options.keys && s.options.keys.length)) {
+                        if (foundPrimitivePoint || s.options.keys?.length) {
                             pointOptions = s.pointClass.prototype
                                 .optionsToObject
                                 .call({ series: s }, pointOptions);
@@ -14274,8 +14458,8 @@ function onBeforeRender(e) {
                 TreeGridAxis_getLevelOptions({
                     defaults: labelOptions,
                     from: 1,
-                    levels: labelOptions && labelOptions.levels,
-                    to: axis.treeGrid.tree && axis.treeGrid.tree.height
+                    levels: labelOptions?.levels,
+                    to: axis.treeGrid.tree?.height
                 });
             // Setting initial collapsed nodes
             if (e.type === 'beforeRender') {
@@ -14516,7 +14700,7 @@ function wrapRedraw(proceed) {
     if (isTreeGrid && axis.visible) {
         axis.tickPositions.forEach(function (pos) {
             const tick = axis.ticks[pos];
-            if (tick.label && tick.label.attachedTreeGridEvents) {
+            if (tick.label?.attachedTreeGridEvents) {
                 TreeGridAxis_removeEvent(tick.label.element);
                 tick.label.attachedTreeGridEvents = false;
             }
@@ -14673,7 +14857,7 @@ class TreeGridAxisAdditions {
             const pos = +key;
             if (pos >= roundedMin &&
                 pos <= roundedMax &&
-                !(axis.brokenAxis && axis.brokenAxis.isInAnyBreak(pos))) {
+                !axis.brokenAxis?.isInAnyBreak(pos)) {
                 arr.push(pos);
             }
             return arr;
@@ -14881,7 +15065,7 @@ highcharts_SeriesRegistry_commonjs_highcharts_SeriesRegistry_commonjs2_highchart
 
 ;// ./code/es-modules/masters/modules/gantt.src.js
 /**
- * @license Highcharts Gantt JS v12.1.2 (2024-12-21)
+ * @license Highcharts Gantt JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/gantt
  * @requires highcharts
  *

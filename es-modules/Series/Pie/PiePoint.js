@@ -70,7 +70,7 @@ class PiePoint extends Point {
     constructor(series, options, x) {
         super(series, options, x);
         this.half = 0;
-        this.name ?? (this.name = 'Slice');
+        this.name ?? (this.name = series.chart.options.lang.pieSliceName);
         // Add event listener for select
         const toggleSlice = (e) => {
             this.slice(e.type === 'select');

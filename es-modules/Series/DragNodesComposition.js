@@ -33,10 +33,16 @@ function compose(ChartClass) {
  */
 function onChartLoad() {
     const chart = this;
-    let mousedownUnbinder, mousemoveUnbinder, mouseupUnbinder;
+    let mousedownUnbinder, mousemoveUnbinder, mouseupUnbinder, point;
     if (chart.container) {
         mousedownUnbinder = addEvent(chart.container, 'mousedown', (event) => {
-            const point = chart.hoverPoint;
+            if (mousemoveUnbinder) {
+                mousemoveUnbinder();
+            }
+            if (mouseupUnbinder) {
+                mouseupUnbinder();
+            }
+            point = chart.hoverPoint;
             if (point &&
                 point.series &&
                 point.series.hasDraggableNodes &&

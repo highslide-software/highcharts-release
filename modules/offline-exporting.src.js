@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/offline-exporting
  * @requires highcharts
  * @requires highcharts/modules/exporting
@@ -583,7 +583,7 @@ const exporting = {
      *
      * @since 2.0
      */
-    url: 'https://export-svg.highcharts.com/',
+    url: `https://export-svg.highcharts.com?v=${(highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default()).version}`,
     /**
      * Settings for a custom font for the exported PDF, when using the
      * `offline-exporting` module. This is used for languages containing
@@ -770,8 +770,7 @@ const exporting = {
                 'downloadPNG',
                 'downloadJPEG',
                 'downloadSVG'
-            ],
-            y: -5
+            ]
         }
     },
     /**
@@ -1049,16 +1048,15 @@ const navigation = {
          */
         /**
          * The vertical offset of the button's position relative to its
-         * `verticalAlign`.
+         * `verticalAlign`. By default adjusted for the chart title alignment.
          *
          * @sample highcharts/navigation/buttonoptions-verticalalign/
          *         Buttons at lower right
          *
-         * @type      {number}
-         * @default   0
          * @since     2.0
          * @apioption navigation.buttonOptions.y
          */
+        y: -5,
         /**
          * The vertical alignment of the buttons. Can be one of `"top"`,
          * `"middle"` or `"bottom"`.
@@ -2825,9 +2823,6 @@ var Exporting;
             .replace(/<svg /, '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ')
             .replace(/ (NS\d+\:)?href=/g, ' xlink:href=') // #3567
             .replace(/\n+/g, ' ')
-            // Batik doesn't support rgba fills and strokes (#3095)
-            .replace(/(fill|stroke)="rgba\(([ \d]+,[ \d]+,[ \d]+),([ \d\.]+)\)"/g, // eslint-disable-line max-len
-        '$1="rgb($2)" $1-opacity="$3"')
             // Replace HTML entities, issue #347
             .replace(/&nbsp;/g, '\u00A0') // No-break space
             .replace(/&shy;/g, '\u00AD'); // Soft hyphen
@@ -2962,7 +2957,7 @@ var Exporting;
  *
  * */
 const OfflineExportingDefaults = {
-    libURL: 'https://code.highcharts.com/12.1.2/lib/',
+    libURL: 'https://code.highcharts.com/12.1.2-modified/lib/',
     // When offline-exporting is loaded, redefine the menu item definitions
     // related to download.
     menuItemDefinitions: {

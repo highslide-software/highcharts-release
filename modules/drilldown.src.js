@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/drilldown
  * @requires highcharts
  *
@@ -994,9 +994,6 @@ Breadcrumbs.defaultOptions = Breadcrumbs_BreadcrumbsDefaults.options;
  *
  * @callback Highcharts.BreadcrumbsFormatterCallbackFunction
  *
- * @param {Highcharts.Event} event
- * Event.
- *
  * @param {Highcharts.BreadcrumbOptions} options
  * Breadcrumb options.
  *
@@ -1204,13 +1201,12 @@ const DrilldownDefaults = {
         duration: 500
     },
     /**
+     * Drill up button is deprecated since Highcharts v9.3.2. Use
+     * [drilldown.breadcrumbs](#drilldown.breadcrumbs) instead.
      *
      * Options for the drill up button that appears when drilling down on a
      * series. The text for the button is defined in
      * [lang.drillUpText](#lang.drillUpText).
-     *
-     * This option is deprecated since 9.3.2, use `drilldown.breadcrumbs`
-     * instead.
      *
      * @sample highcharts/breadcrumbs/single-button
      *         Breadcrumbs set up like a legacy button
@@ -1220,7 +1216,7 @@ const DrilldownDefaults = {
      * @since   3.0.8
      * @product highcharts highmaps
      *
-     * @deprecated
+     * @deprecated 9.3.2
      */
     drillUpButton: {
         /**
@@ -1368,11 +1364,14 @@ const DrilldownDefaults = {
  * @apioption series.line.data.drilldown
  */
 /**
+ * Drill up button is deprecated since Highcharts v9.3.2. Use
+ * [drilldown.breadcrumbs](#drilldown.breadcrumbs) instead.
+ *
  * The text for the button that appears when drilling down, linking back
  * to the parent series. The parent series' name is inserted for
  * `{series.name}`.
  *
- * @deprecated
+ * @deprecated 9.3.2
  * @since    3.0.8
  * @product  highcharts highmaps
  * @requires modules/drilldown
@@ -1476,7 +1475,7 @@ function columnAnimateDrillupFrom(level) {
     if (removeGroup) {
         delete series.group;
     }
-    this.points.forEach((point) => {
+    (this.points || this.data).forEach((point) => {
         const graphic = point.graphic, animateTo = level.shapeArgs;
         if (graphic && animateTo) {
             const complete = () => {
@@ -2435,7 +2434,7 @@ class ChartAdditions {
                 }
             }
         }
-        if (!chart.mapView) {
+        if (!chart.mapView && !isMultipleDrillUp) {
             chart.redraw();
         }
         if (chart.ddDupes) {

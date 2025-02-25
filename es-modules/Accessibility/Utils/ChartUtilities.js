@@ -30,7 +30,7 @@ const { defined, find, fireEvent } = U;
 function fireEventOnWrappedOrUnwrappedElement(el, eventObject) {
     const type = eventObject.type;
     const hcEvents = el.hcEvents;
-    if (!!doc.createEvent &&
+    if (!!doc?.createEvent &&
         (el.dispatchEvent || el.fireEvent)) {
         if (el.dispatchEvent) {
             el.dispatchEvent(eventObject);

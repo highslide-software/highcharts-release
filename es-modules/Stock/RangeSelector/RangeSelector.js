@@ -14,6 +14,8 @@ const { defaultOptions } = D;
 import H from '../../Core/Globals.js';
 import RangeSelectorComposition from './RangeSelectorComposition.js';
 import SVGElement from '../../Core/Renderer/SVG/SVGElement.js';
+import T from '../../Core/Templating.js';
+const { format } = T;
 import U from '../../Core/Utilities.js';
 import OrdinalAxis from '../../Core/Axis/OrdinalAxis.js';
 const { addEvent, createElement, css, defined, destroyObjectProperties, diffObjects, discardElement, extend, fireEvent, isNumber, isString, merge, objectEach, pick, splat } = U;
@@ -87,7 +89,7 @@ class RangeSelector {
      * */
     constructor(chart) {
         this.isDirty = false;
-        this.buttonOptions = RangeSelector.prototype.defaultButtons;
+        this.buttonOptions = [];
         this.initialButtonGroupWidth = 0;
         this.maxButtonWidth = () => {
             let buttonWidth = 0;
@@ -267,7 +269,7 @@ class RangeSelector {
      * @param {Highcharts.Chart} chart
      */
     init(chart) {
-        const rangeSelector = this, options = chart.options.rangeSelector, buttonOptions = options.buttons, selectedOption = options.selected, blurInputs = function () {
+        const rangeSelector = this, options = chart.options.rangeSelector, langOptions = chart.options.lang, buttonOptions = options.buttons, selectedOption = options.selected, blurInputs = function () {
             const minInput = rangeSelector.minInput, maxInput = rangeSelector.maxInput;
             // #3274 in some case blur is not defined
             if (minInput && !!minInput.blur) {
@@ -280,7 +282,20 @@ class RangeSelector {
         rangeSelector.chart = chart;
         rangeSelector.options = options;
         rangeSelector.buttons = [];
-        rangeSelector.buttonOptions = buttonOptions;
+        rangeSelector.buttonOptions = buttonOptions
+            .map((opt) => {
+            if (opt.type && langOptions.rangeSelector) {
+                opt.text ?? (opt.text = langOptions.rangeSelector[`${opt.type}Text`]);
+                opt.title ?? (opt.title = langOptions.rangeSelector[`${opt.type}Title`]);
+            }
+            opt.text = format(opt.text, {
+                count: opt.count || 1
+            });
+            opt.title = format(opt.title, {
+                count: opt.count || 1
+            });
+            return opt;
+        });
         this.eventsToUnbind = [];
         this.eventsToUnbind.push(addEvent(chart.container, 'mousedown', blurInputs));
         this.eventsToUnbind.push(addEvent(chart, 'resize', blurInputs));
@@ -981,7 +996,7 @@ class RangeSelector {
             textContent: rangeOptions.title || rangeOptions.text
         }), i + 2);
         buttons[i] = renderer
-            .button(rangeOptions.text, 0, 0, (e) => {
+            .button(rangeOptions.text ?? '', 0, 0, (e) => {
             // Extract events from button object and call
             const buttonEvents = (rangeOptions.events && rangeOptions.events.click);
             let callDefaultEvent;

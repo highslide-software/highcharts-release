@@ -440,7 +440,9 @@ class PackedBubbleSeries extends BubbleSeries {
         if (point.fixedPosition && !point.removed) {
             const layout = this.layout, parentNodeLayout = this.parentNodeLayout;
             let distanceXY, distanceR;
-            if (parentNodeLayout && layout.options.dragBetweenSeries) {
+            if (!point.isParentNode &&
+                parentNodeLayout &&
+                layout.options.dragBetweenSeries) {
                 parentNodeLayout.nodes.forEach((node) => {
                     if (point && point.marker &&
                         node !== point.series.parentNode) {

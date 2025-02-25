@@ -575,15 +575,16 @@ function chartGetTableAST(useLocalDecimalPoint) {
         };
     };
     // Add table caption
-    if (options.exporting.tableCaption !== false) {
+    const { tableCaption } = options.exporting || {};
+    if (tableCaption !== false) {
         treeChildren.push({
             tagName: 'caption',
             attributes: {
                 'class': 'highcharts-table-caption'
             },
-            textContent: pick(options.exporting.tableCaption, (options.title.text ?
-                options.title.text :
-                'Chart'))
+            textContent: typeof tableCaption === 'string' ?
+                tableCaption :
+                options.title?.text || options.lang.chartTitle
         });
     }
     // Find longest row

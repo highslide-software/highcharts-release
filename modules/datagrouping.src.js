@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v12.1.2 (2024-12-21)
+ * @license Highstock JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/datagrouping
  * @requires highcharts
  *
@@ -361,7 +361,7 @@ const common = {
             '-%[AebY]'
         ],
         week: [
-            'week from %[AebY]',
+            '%v %[AebY]',
             '%[Aeb]',
             '-%[AebY]'
         ],
@@ -623,6 +623,121 @@ const DataGroupingAxisComposition = {
 };
 /* harmony default export */ const DataGrouping_DataGroupingAxisComposition = (DataGroupingAxisComposition);
 
+;// ./code/es-modules/Data/ColumnUtils.js
+/* *
+ *
+ *  (c) 2020-2024 Highsoft AS
+ *
+ *  License: www.highcharts.com/license
+ *
+ *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+ *
+ *  Authors:
+ *  - Dawid Dragula
+ *
+ * */
+/**
+ * Utility functions for columns that can be either arrays or typed arrays.
+ * @private
+ */
+var ColumnUtils;
+(function (ColumnUtils) {
+    /* *
+    *
+    *  Declarations
+    *
+    * */
+    /* *
+    *
+    * Functions
+    *
+    * */
+    /**
+     * Sets the length of the column array.
+     *
+     * @param {DataTable.Column} column
+     * Column to be modified.
+     *
+     * @param {number} length
+     * New length of the column.
+     *
+     * @param {boolean} asSubarray
+     * If column is a typed array, return a subarray instead of a new array. It
+     * is faster `O(1)`, but the entire buffer will be kept in memory until all
+     * views to it are destroyed. Default is `false`.
+     *
+     * @return {DataTable.Column}
+     * Modified column.
+     *
+     * @private
+     */
+    function setLength(column, length, asSubarray) {
+        if (Array.isArray(column)) {
+            column.length = length;
+            return column;
+        }
+        return column[asSubarray ? 'subarray' : 'slice'](0, length);
+    }
+    ColumnUtils.setLength = setLength;
+    /**
+     * Splices a column array.
+     *
+     * @param {DataTable.Column} column
+     * Column to be modified.
+     *
+     * @param {number} start
+     * Index at which to start changing the array.
+     *
+     * @param {number} deleteCount
+     * An integer indicating the number of old array elements to remove.
+     *
+     * @param {boolean} removedAsSubarray
+     * If column is a typed array, return a subarray instead of a new array. It
+     * is faster `O(1)`, but the entire buffer will be kept in memory until all
+     * views to it are destroyed. Default is `true`.
+     *
+     * @param {Array<number>|TypedArray} items
+     * The elements to add to the array, beginning at the start index. If you
+     * don't specify any elements, `splice()` will only remove elements from the
+     * array.
+     *
+     * @return {SpliceResult}
+     * Object containing removed elements and the modified column.
+     *
+     * @private
+     */
+    function splice(column, start, deleteCount, removedAsSubarray, items = []) {
+        if (Array.isArray(column)) {
+            if (!Array.isArray(items)) {
+                items = Array.from(items);
+            }
+            return {
+                removed: column.splice(start, deleteCount, ...items),
+                array: column
+            };
+        }
+        const Constructor = Object.getPrototypeOf(column)
+            .constructor;
+        const removed = column[removedAsSubarray ? 'subarray' : 'slice'](start, start + deleteCount);
+        const newLength = column.length - deleteCount + items.length;
+        const result = new Constructor(newLength);
+        result.set(column.subarray(0, start), 0);
+        result.set(items, start);
+        result.set(column.subarray(start + deleteCount), start + items.length);
+        return {
+            removed: removed,
+            array: result
+        };
+    }
+    ColumnUtils.splice = splice;
+})(ColumnUtils || (ColumnUtils = {}));
+/* *
+ *
+ *  Default Export
+ *
+ * */
+/* harmony default export */ const Data_ColumnUtils = (ColumnUtils);
+
 ;// ./code/es-modules/Data/DataTableCore.js
 /* *
  *
@@ -640,7 +755,9 @@ const DataGroupingAxisComposition = {
  * */
 
 
-const { fireEvent, isArray, objectEach, uniqueKey } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
+const { setLength, splice } = Data_ColumnUtils;
+
+const { fireEvent, objectEach, uniqueKey } = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
 /* *
  *
  *  Class
@@ -684,7 +801,7 @@ class DataTableCore {
         this.autoId = !options.id;
         this.columns = {};
         /**
-         * ID of the table for indentification purposes.
+         * ID of the table for identification purposes.
          *
          * @name Highcharts.DataTable#id
          * @type {string}
@@ -714,11 +831,38 @@ class DataTableCore {
      */
     applyRowCount(rowCount) {
         this.rowCount = rowCount;
-        objectEach(this.columns, (column) => {
-            if (isArray(column)) { // Not on typed array
-                column.length = rowCount;
+        objectEach(this.columns, (column, columnName) => {
+            if (column.length !== rowCount) {
+                this.columns[columnName] = setLength(column, rowCount);
             }
         });
+    }
+    /**
+     * Delete rows. Simplified version of the full
+     * `DataTable.deleteRows` method.
+     *
+     * @param {number} rowIndex
+     * The start row index
+     *
+     * @param {number} [rowCount=1]
+     * The number of rows to delete
+     *
+     * @return {void}
+     *
+     * @emits #afterDeleteRows
+     */
+    deleteRows(rowIndex, rowCount = 1) {
+        if (rowCount > 0 && rowIndex < this.rowCount) {
+            let length = 0;
+            objectEach(this.columns, (column, columnName) => {
+                this.columns[columnName] =
+                    splice(column, rowIndex, rowCount).array;
+                length = column.length;
+            });
+            this.rowCount = length;
+        }
+        fireEvent(this, 'afterDeleteRows', { rowIndex, rowCount });
+        this.versionTag = uniqueKey();
     }
     /**
      * Fetches the given column by the canonical column name. Simplified version
@@ -778,7 +922,7 @@ class DataTableCore {
      * @param {Highcharts.DataTableColumn} [column]
      * Values to set in the column.
      *
-     * @param {number} [rowIndex=0]
+     * @param {number} [rowIndex]
      * Index of the first row to change. (Default: 0)
      *
      * @param {Record<string, (boolean|number|string|null|undefined)>} [eventDetail]
@@ -791,15 +935,16 @@ class DataTableCore {
         this.setColumns({ [columnName]: column }, rowIndex, eventDetail);
     }
     /**
-     * * Sets cell values for multiple columns. Will insert new columns, if not
-     * found. Simplified version of the full `DataTable.setColumns`, limited to
-     * full replacement of the columns (undefined `rowIndex`).
+     * Sets cell values for multiple columns. Will insert new columns, if not
+     * found. Simplified version of the full `DataTableCore.setColumns`, limited
+     * to full replacement of the columns (undefined `rowIndex`).
      *
      * @param {Highcharts.DataTableColumnCollection} columns
      * Columns as a collection, where the keys are the column names.
      *
      * @param {number} [rowIndex]
-     * Index of the first row to change. Keep undefined to reset.
+     * Index of the first row to change. Ignored in the `DataTableCore`, as it
+     * always replaces the full column.
      *
      * @param {Record<string, (boolean|number|string|null|undefined)>} [eventDetail]
      * Custom information for pending events.
@@ -828,7 +973,7 @@ class DataTableCore {
      * Cell values to set.
      *
      * @param {number} [rowIndex]
-     * Index of the row to set. Leave `undefind` to add as a new row.
+     * Index of the row to set. Leave `undefined` to add as a new row.
      *
      * @param {boolean} [insert]
      * Whether to insert the row at the given index, or to overwrite the row.
@@ -841,11 +986,11 @@ class DataTableCore {
     setRow(row, rowIndex = this.rowCount, insert, eventDetail) {
         const { columns } = this, indexRowCount = insert ? this.rowCount + 1 : rowIndex + 1;
         objectEach(row, (cellValue, columnName) => {
-            const column = columns[columnName] ||
+            let column = columns[columnName] ||
                 eventDetail?.addColumns !== false && new Array(indexRowCount);
             if (column) {
                 if (insert) {
-                    column.splice(rowIndex, 0, cellValue);
+                    column = splice(column, rowIndex, 0, true, [cellValue]).array;
                 }
                 else {
                     column[rowIndex] = cellValue;
@@ -874,8 +1019,11 @@ class DataTableCore {
  *
  * */
 /**
+ * A typed array.
+ * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} Highcharts.TypedArray
+ * //**
  * A column of values in a data table.
- * @typedef {Array<boolean|null|number|string|undefined>} Highcharts.DataTableColumn
+ * @typedef {Array<boolean|null|number|string|undefined>|Highcharts.TypedArray} Highcharts.DataTableColumn
  */ /**
 * A collection of data table columns defined by a object where the key is the
 * column name and the value is an array of the column values.
@@ -1676,7 +1824,7 @@ function onTooltipHeaderFormatter(e) {
         // Return the replaced format
         e.text = format(formatString, {
             point: DataGrouping_extend(point, { key: formattedKey }),
-            series: series
+            series
         }, chart);
         e.preventDefault();
     }
@@ -1860,7 +2008,7 @@ const DataGroupingComposition = {
  *     minute: ['%A, %e %b, %H:%M', '%A, %e %b, %H:%M', '-%H:%M'],
  *     hour: ['%A, %e %b, %H:%M', '%A, %e %b, %H:%M', '-%H:%M'],
  *     day: ['%A, %e %b %Y', '%A, %e %b', '-%A, %e %b %Y'],
- *     week: ['Week from %A, %e %b %Y', '%A, %e %b', '-%A, %e %b %Y'],
+ *     week: ['%v %A, %e %b %Y', '%A, %e %b', '-%A, %e %b %Y'],
  *     month: ['%B %Y', '%B', '-%B %Y'],
  *     year: ['%Y', '%Y', '-%Y']
  * }

@@ -220,15 +220,12 @@ export type BreadcrumbsClickCallbackFunction = (event: Event, options: Breadcrum
 /**
  * Callback function to format the breadcrumb text from scratch.
  *
- * @param event
- *        Event.
- *
  * @param options
  *        Breadcrumb options.
  *
  * @return Formatted text or false
  */
-export type BreadcrumbsFormatterCallbackFunction = (event: Event, options: BreadcrumbOptions) => string;
+export type BreadcrumbsFormatterCallbackFunction = (options: BreadcrumbOptions) => string;
 export type BubbleSizeByValue = ("area"|"width");
 export type ButtonRelativeToValue = ("plotBox"|"spacingBox");
 /**
@@ -402,9 +399,9 @@ export type DataParseDateCallbackFunction = (dateValue: string) => number;
  */
 export type DataParsedCallbackFunction = (columns: Array<Array<any>>) => (boolean|undefined);
 /**
- * A column of values in a data table.
+ * A typed array.
  */
-export type DataTableColumn = Array<(boolean|null|number|string|undefined)>;
+export type DataTableColumn = (Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|Uint8Array|Uint8ClampedArray);
 /**
  * A collection of data table columns defined by a object where the key is the
  * column name and the value is an array of the column values.
@@ -9803,6 +9800,78 @@ export interface DrilldownBreadcrumbsSeparatorStyleOptions {
     fontSize?: number;
 }
 /**
+ * (Highcharts, Highmaps) Drill up button is deprecated since Highcharts v9.3.2.
+ * Use drilldown.breadcrumbs instead.
+ *
+ * Options for the drill up button that appears when drilling down on a series.
+ * The text for the button is defined in lang.drillUpText.
+ *
+ * @deprecated 9.3.2
+ */
+export interface DrilldownDrillUpButtonOptions {
+    /**
+     * (Highcharts, Highmaps) Positioning options for the button within the
+     * `relativeTo` box. Available properties are `x`, `y`, `align` and
+     * `verticalAlign`.
+     *
+     * @deprecated 9.3.2
+     */
+    position?: (AlignObject|DrilldownDrillUpButtonPositionOptions);
+    /**
+     * (Highcharts, Highmaps) What box to align the button to. Can be either
+     * `plotBox` or `spacingBox`.
+     *
+     * @deprecated 9.3.2
+     */
+    relativeTo?: ButtonRelativeToValue;
+    /**
+     * (Highcharts, Highmaps) A collection of attributes for the button. The
+     * object takes SVG attributes like `fill`, `stroke`, `stroke-width` or `r`,
+     * the border radius. The theme also supports `style`, a collection of CSS
+     * properties for the text. Equivalent attributes for the hover state are
+     * given in `theme.states.hover`.
+     *
+     * In styled mode, drill-up button styles can be applied with the
+     * `.highcharts-drillup-button` class.
+     *
+     * @deprecated 9.3.2
+     */
+    theme?: object;
+}
+/**
+ * (Highcharts, Highmaps) Positioning options for the button within the
+ * `relativeTo` box. Available properties are `x`, `y`, `align` and
+ * `verticalAlign`.
+ *
+ * @deprecated 9.3.2
+ */
+export interface DrilldownDrillUpButtonPositionOptions {
+    /**
+     * (Highcharts, Highmaps) Horizontal alignment.
+     *
+     * @deprecated 9.3.2
+     */
+    align?: AlignValue;
+    /**
+     * (Highcharts, Highmaps) Vertical alignment of the button.
+     *
+     * @deprecated 9.3.2
+     */
+    verticalAlign?: VerticalAlignValue;
+    /**
+     * (Highcharts, Highmaps) The X offset of the button.
+     *
+     * @deprecated 9.3.2
+     */
+    x?: number;
+    /**
+     * (Highcharts, Highmaps) The Y offset of the button.
+     *
+     * @deprecated 9.3.2
+     */
+    y?: number;
+}
+/**
  * The event arguments when a drilldown point is clicked.
  */
 export interface DrilldownEventObject {
@@ -9898,6 +9967,16 @@ export interface DrilldownOptions {
      * top leading the way up through the drilldown levels.
      */
     breadcrumbs?: DrilldownBreadcrumbsOptions;
+    /**
+     * (Highcharts, Highmaps) Drill up button is deprecated since Highcharts
+     * v9.3.2. Use drilldown.breadcrumbs instead.
+     *
+     * Options for the drill up button that appears when drilling down on a
+     * series. The text for the button is defined in lang.drillUpText.
+     *
+     * @deprecated 9.3.2
+     */
+    drillUpButton?: DrilldownDrillUpButtonOptions;
     /**
      * (Highmaps) Enable or disable zooming into a region of clicked map point
      * you want to drill into. If mapZooming is set to false the
@@ -10155,7 +10234,8 @@ export interface ExportingButtonsOptionsObject {
     x?: number;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) The vertical offset of the
-     * button's position relative to its `verticalAlign`.
+     * button's position relative to its `verticalAlign`. By default adjusted
+     * for the chart title alignment.
      */
     y?: number;
 }
@@ -10465,7 +10545,7 @@ export interface ExportingOptions {
      * converting the SVG string to an image format. By default this points to
      * Highchart's free web service.
      */
-    url?: string;
+    url?: object;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) Use multi level headers in data
      * table. If csv.columnHeaderFormatter is defined, it has to return objects
@@ -10883,8 +10963,8 @@ export interface GlobalButtonThemeStyleOptions {
 }
 /**
  * (Highcharts, Highstock, Highmaps, Gantt) Global options that don't apply to
- * each chart. These options, like the `lang` options, must be set using the
- * `Highcharts.setOptions` method. (see online documentation for example)
+ * each chart. These options must be set using the `Highcharts.setOptions`
+ * method. (see online documentation for example)
  */
 export interface GlobalOptions {
     /**
@@ -11841,6 +11921,10 @@ export interface LangOptions {
      */
     accessibility?: LangAccessibilityOptions;
     /**
+     * (Highcharts, Highstock, Highmaps, Gantt) The default chart title.
+     */
+    chartTitle?: string;
+    /**
      * (Highcharts, Highstock, Highmaps, Gantt) Exporting module menu. The
      * tooltip title for the context menu holding print and export menu items.
      */
@@ -11885,6 +11969,17 @@ export interface LangOptions {
      * (Highcharts, Highstock, Highmaps, Gantt) The text for the menu item.
      */
     downloadXLS?: string;
+    /**
+     * (Highcharts, Highmaps) Drill up button is deprecated since Highcharts
+     * v9.3.2. Use drilldown.breadcrumbs instead.
+     *
+     * The text for the button that appears when drilling down, linking back to
+     * the parent series. The parent series' name is inserted for
+     * `{series.name}`.
+     *
+     * @deprecated 9.3.2
+     */
+    drillUpText?: object;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) Exporting module only. The text
      * for the menu item to exit the chart from full screen.
@@ -11963,6 +12058,11 @@ export interface LangOptions {
      */
     numericSymbols?: Array<string>;
     /**
+     * (Highcharts, Highstock, Highmaps, Gantt) The default name for a pie slice
+     * (point).
+     */
+    pieSliceName?: string;
+    /**
      * (Highcharts, Highstock, Highmaps, Gantt) The text for the Play as sound
      * menu item in the export menu.
      */
@@ -11972,6 +12072,11 @@ export interface LangOptions {
      * for the menu item to print the chart.
      */
     printChart?: string;
+    /**
+     * (Highcharts, Highstock, Highmaps, Gantt) The default text for the
+     * rangeselector buttons.
+     */
+    rangeSelector?: LangRangeSelectorOptions;
     /**
      * (Highstock, Gantt) The text for the label for the "from" input box in the
      * range selector. Since v9.0, this string is empty as the label is not
@@ -11992,11 +12097,12 @@ export interface LangOptions {
      * when a chart is zoomed.
      */
     resetZoom?: string;
-    /**
-     * (Highcharts, Highstock, Highmaps, Gantt) The tooltip title for the label
-     * appearing when a chart is zoomed.
-     */
     resetZoomTitle?: string;
+    /**
+     * (Highcharts, Highstock, Highmaps, Gantt) Format string for the default
+     * series name.
+     */
+    seriesName?: string;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) An array containing the months
      * names in abbreviated form. Corresponds to the `%b` format in
@@ -12037,6 +12143,11 @@ export interface LangOptions {
      * used according to the `lang.locale` setting.
      */
     weekdays?: Array<string>;
+    weekFrom?: string;
+    /**
+     * (Highcharts, Highstock, Highmaps, Gantt) The default title of the Y axis
+     */
+    yAxisTitle?: string;
     /**
      * (Highmaps) The title appearing on hovering the zoom in button. The text
      * itself defaults to "+" and can be changed in the button options.
@@ -12047,6 +12158,20 @@ export interface LangOptions {
      * itself defaults to "-" and can be changed in the button options.
      */
     zoomOut?: string;
+}
+/**
+ * (Highcharts, Highstock, Highmaps, Gantt) The default text for the
+ * rangeselector buttons.
+ */
+export interface LangRangeSelectorOptions {
+    allText?: string;
+    allTitle?: string;
+    monthText?: string;
+    monthTitle?: string;
+    yearText?: string;
+    yearTitle?: string;
+    ytdText?: string;
+    ytdTitle?: string;
 }
 export interface LangStockToolsGuiOptions {
     advanced?: string;
@@ -14777,7 +14902,8 @@ export interface NavigationButtonOptions {
     width?: number;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) The vertical offset of the
-     * button's position relative to its `verticalAlign`.
+     * button's position relative to its `verticalAlign`. By default adjusted
+     * for the chart title alignment.
      */
     y?: number;
 }
@@ -17973,12 +18099,10 @@ export interface NavigatorYAxisTitleOptions {
      */
     style?: (CSSObject|NavigatorYAxisTitleStyleOptions);
     /**
-     * (Highcharts, Highstock, Gantt) The actual text of the axis title.
-     * Horizontal texts can contain HTML, but rotated texts are painted using
-     * vector techniques and must be clean text. The Y axis title is disabled by
-     * setting the `text` option to `undefined`.
+     * (Highstock, Gantt) The actual text of the axis title. It can contain
+     * basic HTML tags like `b`, `i` and `span` with style.
      */
-    text?: (string|null);
+    text?: string;
     /**
      * (Highstock, Gantt) Alignment of the text, can be `"left"`, `"right"` or
      * `"center"`. Default alignment depends on the title.align:
@@ -18234,9 +18358,8 @@ export interface Options {
     exporting?: ExportingOptions;
     /**
      * (Highcharts, Highstock, Highmaps, Gantt) Global options that don't apply
-     * to each chart. These options, like the `lang` options, must be set using
-     * the `Highcharts.setOptions` method. (see online documentation for
-     * example)
+     * to each chart. These options must be set using the
+     * `Highcharts.setOptions` method. (see online documentation for example)
      */
     global?: GlobalOptions;
     /**
@@ -78217,7 +78340,7 @@ export interface ScrollbarOptions {
     /**
      * (Highstock, Gantt) The margin between the scrollbar and its axis when the
      * scrollbar is applied directly to an axis, or the navigator in case that
-     * is enabled. Defaults to 10 for axis, 0 for navigator.
+     * is enabled. Defaults to 10 for axis, 3 for navigator.
      */
     margin?: (number|undefined);
     /**
@@ -81097,6 +81220,10 @@ export interface SeriesLastPriceOptionsObject {
      */
     color?: string;
     /**
+     * (Highstock) Name of the dash style to use for the line of last price.
+     */
+    dashStyle?: DashStyleValue;
+    /**
      * (Highstock) Enable or disable the indicator.
      */
     enabled?: boolean;
@@ -81107,6 +81234,10 @@ export interface SeriesLastPriceOptionsObject {
      * `.highcharts-crosshair-label` class.
      */
     label?: SeriesLastPriceLabelOptionsObject;
+    /**
+     * (Highstock) Width of the last price line.
+     */
+    width?: number;
 }
 /**
  * (Highstock) A label on the axis next to the crosshair.
@@ -81169,6 +81300,16 @@ export interface SeriesLastVisiblePriceLabelOptionsObject {
  */
 export interface SeriesLastVisiblePriceOptionsObject {
     /**
+     * (Highstock) The color of the line of last visible price. By default,
+     * color is not applied and the line is not visible.
+     */
+    color?: string;
+    /**
+     * (Highstock) Name of the dash style to use for the line of last visible
+     * price.
+     */
+    dashStyle?: DashStyleValue;
+    /**
      * (Highstock) Enable or disable the indicator.
      */
     enabled?: boolean;
@@ -81179,6 +81320,10 @@ export interface SeriesLastVisiblePriceOptionsObject {
      * `.highcharts-crosshair-label` class.
      */
     label?: SeriesLastVisiblePriceLabelOptionsObject;
+    /**
+     * (Highstock) Width of the last visible price line.
+     */
+    width?: number;
 }
 /**
  * Information about the event.
@@ -88736,6 +88881,13 @@ export interface SubtitleObject extends SVGElement {
  */
 export interface SubtitleOptions {
     /**
+     * (Highcharts, Highstock, Highmaps, Gantt) The horizontal alignment of the
+     * subtitle. Can be one of "left", "center" and "right". Since v12, it
+     * defaults to `undefined`, meaning the actual alignment is inherited from
+     * the alignment of the main title.
+     */
+    align?: AlignValue;
+    /**
      * (Highcharts, Highstock, Highmaps, Gantt) When the subtitle is floating,
      * the plot area will not move to make space for it.
      */
@@ -91308,7 +91460,7 @@ export interface XAxisScrollbarOptions {
     /**
      * (Highstock) The margin between the scrollbar and its axis when the
      * scrollbar is applied directly to an axis, or the navigator in case that
-     * is enabled. Defaults to 10 for axis, 0 for navigator.
+     * is enabled. Defaults to 10 for axis, 3 for navigator.
      */
     margin?: (number|undefined);
     /**
@@ -93523,10 +93675,9 @@ export interface YAxisTitleOptions {
      */
     style?: (CSSObject|YAxisTitleStyleOptions);
     /**
-     * (Highcharts, Highstock, Gantt) The actual text of the axis title.
-     * Horizontal texts can contain HTML, but rotated texts are painted using
-     * vector techniques and must be clean text. The Y axis title is disabled by
-     * setting the `text` option to `undefined`.
+     * (Highcharts, Highstock, Highmaps, Gantt) The actual text of the axis
+     * title. It can contain basic HTML tags like `b`, `i` and `span` with
+     * style.
      */
     text?: (string|null);
     /**
@@ -95987,7 +96138,7 @@ export class DataTable {
      */
     autoId: boolean;
     /**
-     * ID of the table for indentification purposes.
+     * ID of the table for identification purposes.
      */
     id: string;
 }
@@ -96181,6 +96332,10 @@ export class Point {
      * `plotY` value is the number of pixels from the right of the `yAxis`.
      */
     plotY?: number;
+    /**
+     * Array of all hovered points when using shared tooltips.
+     */
+    points?: Array<Point>;
     /**
      * Whether the point is selected or not.
      */
@@ -96500,11 +96655,14 @@ export class Pointer {
     normalize(e: (MouseEvent|PointerEvent|TouchEvent), chartPosition?: OffsetObject): PointerEventObject;
     /**
      * Reset the tracking by hiding the tooltip, the hover series state and the
-     * hover point
+     * hover point.
      *
      * @param allowMove
      *        Instead of destroying the tooltip altogether, allow moving it if
      *        possible.
+     *
+     * @param delay
+     *        The tooltip hide delay in ms.
      */
     reset(allowMove?: boolean, delay?: number): void;
 }
@@ -97972,11 +98130,12 @@ export class Time {
      * | Long weekday, like 'Monday' | | | `%a` | Short weekday, like 'Mon' | |
      * | `%E` | Narrow weekday, single character | | | `%d` | Two digit day of
      * the month, 01 to 31 | | | `%e` | Day of the month, 1 through 31 | | |
-     * `%w` | Day of the week, 0 through 6 | N/A | | `%b` | Short month, like
-     * 'Jan' | | | `%B` | Long month, like 'January' | | | `%m` | Two digit
-     * month number, 01 through 12 | | | `%o` | Month number, 1 through 12 | | |
-     * `%y` | Two digits year, like 24 for 2024 | | | `%Y` | Four digits year,
-     * like 2024 | | | `%H` | Two digits hours in 24h format, 00 through 23 |
+     * `%w` | Day of the week, 0 through 6 | N/A | | `%v` | The prefix "week
+     * from", read from `lang.weekFrom` | N/A | | `%b` | Short month, like 'Jan'
+     * | | | `%B` | Long month, like 'January' | | | `%m` | Two digit month
+     * number, 01 through 12 | | | `%o` | Month number, 1 through 12 | | | `%y`
+     * | Two digits year, like 24 for 2024 | | | `%Y` | Four digits year, like
+     * 2024 | | | `%H` | Two digits hours in 24h format, 00 through 23 |
      * Depending on the locale, 12h format may be instered. | | `%k` | Hours in
      * 24h format, 0 through 23 | Depending on the locale, 12h format may be
      * instered. | | `%I` | Two digits hours in 12h format, 00 through 11 | N/A.
@@ -98601,12 +98760,12 @@ export function fireEvent<T>(el: T, type: string, eventArguments?: (Event|Dictio
  *        The context, a collection of key-value pairs where each key is
  *        replaced by its value.
  *
- * @param chart
- *        A `Chart` instance used to get numberFormatter and time.
+ * @param owner
+ *        A `Chart` or `DataGrid` instance used to get numberFormatter and time.
  *
  * @return The formatted string.
  */
-export function format(str: string, ctx: Record<string, any>, chart?: Chart): string;
+export function format(str: string, ctx: Record<string, any>, owner?: Chart): string;
 /**
  * Get the defer as a number value from series animation options.
  *
@@ -99055,6 +99214,18 @@ export function crisp(value: number, lineWidth: number, inverted?: boolean): num
  * Shorthand to get a cached `Intl.DateTimeFormat` instance.
  */
 export function dateTimeFormat(): void;
+/**
+ * Delete rows. Simplified version of the full `DataTable.deleteRows` method.
+ *
+ * @param rowIndex
+ *        The start row index
+ *
+ * @param rowCount
+ *        The number of rows to delete
+ *
+ * @fires #afterDeleteRows
+ */
+export function deleteRows(rowIndex: number, rowCount?: number): void;
 export function diamond(): void;
 /**
  * Fetches the given column by the canonical column name. Simplified version of
@@ -99160,15 +99331,16 @@ export function roundedRect(): void;
  */
 export function setColumn(columnName: string, column?: DataTableColumn, rowIndex?: number, eventDetail?: Record<string, (boolean|number|string|null|undefined)>): void;
 /**
- * * Sets cell values for multiple columns. Will insert new columns, if not
- * found. Simplified version of the full `DataTable.setColumns`, limited to full
+ * Sets cell values for multiple columns. Will insert new columns, if not found.
+ * Simplified version of the full `DataTableCore.setColumns`, limited to full
  * replacement of the columns (undefined `rowIndex`).
  *
  * @param columns
  *        Columns as a collection, where the keys are the column names.
  *
  * @param rowIndex
- *        Index of the first row to change. Keep undefined to reset.
+ *        Index of the first row to change. Ignored in the `DataTableCore`, as
+ *        it always replaces the full column.
  *
  * @param eventDetail
  *        Custom information for pending events.
@@ -99186,7 +99358,7 @@ export function setColumns(columns: DataTableColumnCollection, rowIndex?: number
  *        Cell values to set.
  *
  * @param rowIndex
- *        Index of the row to set. Leave `undefind` to add as a new row.
+ *        Index of the row to set. Leave `undefined` to add as a new row.
  *
  * @param insert
  *        Whether to insert the row at the given index, or to overwrite the row.

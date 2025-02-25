@@ -995,9 +995,9 @@ class Navigator {
             navigator.xAxis.navigatorAxis.toFixedRange = (NavigatorAxisAdditions.prototype.toFixedRange.bind(navigator.xAxis.navigatorAxis));
         }
         // Initialize the scrollbar
-        if (chart.options.scrollbar.enabled) {
+        if (chart.options.scrollbar?.enabled) {
             const options = merge(chart.options.scrollbar, { vertical: chart.inverted });
-            if (!isNumber(options.margin) && navigator.navigatorEnabled) {
+            if (!isNumber(options.margin)) {
                 options.margin = chart.inverted ? -3 : 3;
             }
             chart.scrollbar = navigator.scrollbar = new Scrollbar(chart.renderer, options, chart);
@@ -1426,10 +1426,10 @@ class Navigator {
                 marginName = navigator.opposite ?
                     'marginRight' : 'plotLeft';
             }
-            chart[marginName] =
-                (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
-                    navigator.height + navigator.scrollbarHeight :
-                    0) + navigator.navigatorOptions.margin;
+            chart[marginName] = (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
+                navigator.height +
+                    (this.scrollbar?.options.margin || 0) +
+                    navigator.scrollbarHeight : 0) + (navigator.navigatorOptions.margin || 0);
         }), addEvent(Navigator, 'setRange', function (e) {
             this.chart.xAxis[0].setExtremes(e.min, e.max, e.redraw, e.animation, e.eventArguments);
         }));

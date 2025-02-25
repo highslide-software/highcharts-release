@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/highcharts
  *
  * (c) 2009-2024 Torstein Honsi
@@ -74,12 +74,10 @@ var Globals;
      *  Constants
      *
      * */
-    Globals.SVG_NS = 'http://www.w3.org/2000/svg', Globals.product = 'Highcharts', Globals.version = '12.1.2', Globals.win = (typeof window !== 'undefined' ?
+    Globals.SVG_NS = 'http://www.w3.org/2000/svg', Globals.product = 'Highcharts', Globals.version = '12.1.2-modified', Globals.win = (typeof window !== 'undefined' ?
         window :
         {}), // eslint-disable-line node/no-unsupported-features/es-builtins
-    Globals.doc = Globals.win.document, Globals.svg = (Globals.doc &&
-        Globals.doc.createElementNS &&
-        !!Globals.doc.createElementNS(Globals.SVG_NS, 'svg').createSVGRect), Globals.pageLang = Globals.doc?.documentElement?.closest('[lang]')?.lang, Globals.userAgent = (Globals.win.navigator && Globals.win.navigator.userAgent) || '', Globals.isChrome = Globals.win.chrome, Globals.isFirefox = Globals.userAgent.indexOf('Firefox') !== -1, Globals.isMS = /(edge|msie|trident)/i.test(Globals.userAgent) && !Globals.win.opera, Globals.isSafari = !Globals.isChrome && Globals.userAgent.indexOf('Safari') !== -1, Globals.isTouchDevice = /(Mobile|Android|Windows Phone)/.test(Globals.userAgent), Globals.isWebKit = Globals.userAgent.indexOf('AppleWebKit') !== -1, Globals.deg2rad = Math.PI * 2 / 360, Globals.marginNames = [
+    Globals.doc = Globals.win.document, Globals.svg = !!Globals.doc?.createElementNS?.(Globals.SVG_NS, 'svg')?.createSVGRect, Globals.pageLang = Globals.doc?.documentElement?.closest('[lang]')?.lang, Globals.userAgent = Globals.win.navigator?.userAgent || '', Globals.isChrome = Globals.win.chrome, Globals.isFirefox = Globals.userAgent.indexOf('Firefox') !== -1, Globals.isMS = /(edge|msie|trident)/i.test(Globals.userAgent) && !Globals.win.opera, Globals.isSafari = !Globals.isChrome && Globals.userAgent.indexOf('Safari') !== -1, Globals.isTouchDevice = /(Mobile|Android|Windows Phone)/.test(Globals.userAgent), Globals.isWebKit = Globals.userAgent.indexOf('AppleWebKit') !== -1, Globals.deg2rad = Math.PI * 2 / 360, Globals.marginNames = [
         'plotTop',
         'marginRight',
         'marginBottom',
@@ -508,10 +506,10 @@ function isDOMElement(obj) {
  *         True if the argument is a class.
  */
 function isClass(obj) {
-    const c = obj && obj.constructor;
+    const c = obj?.constructor;
     return !!(isObject(obj, true) &&
         !isDOMElement(obj) &&
-        (c && c.name && c.name !== 'Object'));
+        (c?.name && c.name !== 'Object'));
 }
 /**
  * Utility function to check if an item is a number and it is finite (not NaN,
@@ -1149,9 +1147,7 @@ function destroyObjectProperties(obj, except, destructablesOnly) {
  *        The HTML node to discard.
  */
 function discardElement(element) {
-    if (element && element.parentElement) {
-        element.parentElement.removeChild(element);
-    }
+    element?.parentElement?.removeChild(element);
 }
 /**
  * Fix JS round off float errors.
@@ -1314,8 +1310,7 @@ function getStyle(el, prop, toInt) {
         let offsetWidth = Math.min(el.offsetWidth, el.scrollWidth);
         // In flex boxes, we need to use getBoundingClientRect and floor it,
         // because scrollWidth doesn't support subpixel precision (#6427) ...
-        const boundingClientRectWidth = el.getBoundingClientRect &&
-            el.getBoundingClientRect().width;
+        const boundingClientRectWidth = el.getBoundingClientRect?.().width;
         // ...unless if the containing div or its parents are transform-scaled
         // down, in which case the boundingClientRect can't be used as it is
         // also scaled down (#9871, #10498).
@@ -1597,7 +1592,7 @@ function removeEvent(el, type, fn) {
 function fireEvent(el, type, eventArguments, defaultFunction) {
     /* eslint-enable valid-jsdoc */
     eventArguments = eventArguments || {};
-    if (doc.createEvent &&
+    if (doc?.createEvent &&
         (el.dispatchEvent ||
             (el.fireEvent &&
                 // Enable firing events on Highcharts instance.
@@ -3488,7 +3483,7 @@ const SeriesPalettes = {
 };
 /* harmony default export */ const Palettes = (SeriesPalettes);
 
-;// ./code/es-modules/Core/Time.js
+;// ./code/es-modules/Shared/TimeBase.js
 /* *
  *
  *  (c) 2010-2024 Torstein Honsi
@@ -3500,9 +3495,9 @@ const SeriesPalettes = {
  * */
 
 
-const { pageLang, win: Time_win } = Core_Globals;
+const { pageLang, win: TimeBase_win } = Core_Globals;
 
-const { defined: Time_defined, error: Time_error, extend: Time_extend, isNumber: Time_isNumber, isObject: Time_isObject, isString: Time_isString, merge: Time_merge, objectEach: Time_objectEach, pad: Time_pad, splat: Time_splat, timeUnits: Time_timeUnits, ucfirst: Time_ucfirst } = Core_Utilities;
+const { defined: TimeBase_defined, error: TimeBase_error, extend: TimeBase_extend, isNumber: TimeBase_isNumber, isObject: TimeBase_isObject, isString: TimeBase_isString, merge: TimeBase_merge, objectEach: TimeBase_objectEach, pad: TimeBase_pad, splat: TimeBase_splat, timeUnits: TimeBase_timeUnits, ucfirst: TimeBase_ucfirst } = Core_Utilities;
 /* *
  *
  *  Constants
@@ -3510,12 +3505,9 @@ const { defined: Time_defined, error: Time_error, extend: Time_extend, isNumber:
  * */
 // To do: Remove this when we no longer need support for Safari < v14.1
 const hasOldSafariBug = Core_Globals.isSafari &&
-    Time_win.Intl &&
-    !Time_win.Intl.DateTimeFormat.prototype.formatRange;
+    TimeBase_win.Intl &&
+    !TimeBase_win.Intl.DateTimeFormat.prototype.formatRange;
 const isDateTimeFormatOptions = (obj) => obj.main === void 0;
-// We use the Spanish locale for internal weekday handling because it uses
-// unique letters for narrow weekdays
-const spanishWeekdayIndex = (weekday) => ['D', 'L', 'M', 'X', 'J', 'V', 'S'].indexOf(weekday);
 /* *
  *
  *  Class
@@ -3578,13 +3570,13 @@ const spanishWeekdayIndex = (weekday) => ['D', 'L', 'M', 'X', 'J', 'V', 'S'].ind
  * @param {Highcharts.TimeOptions} [options] Time options as defined in
  * [chart.options.time](/highcharts/time).
  */
-class Time {
+class TimeBase {
     /* *
      *
      *  Constructors
      *
      * */
-    constructor(options) {
+    constructor(options, lang) {
         /* *
          *
          *  Properties
@@ -3594,8 +3586,9 @@ class Time {
             timezone: 'UTC'
         };
         this.variableTimezone = false;
-        this.Date = Time_win.Date;
+        this.Date = TimeBase_win.Date;
         this.update(options);
+        this.lang = lang;
     }
     /* *
      *
@@ -3615,13 +3608,13 @@ class Time {
      */
     update(options = {}) {
         this.dTLCache = {};
-        this.options = options = Time_merge(true, this.options, options);
+        this.options = options = TimeBase_merge(true, this.options, options);
         const { timezoneOffset, useUTC } = options;
         // Allow using a different Date class
-        this.Date = options.Date || Time_win.Date || Date;
+        this.Date = options.Date || TimeBase_win.Date || Date;
         // Assign the time zone. Handle the legacy, deprecated `useUTC` option.
         let timezone = options.timezone;
-        if (Time_defined(useUTC)) {
+        if (TimeBase_defined(useUTC)) {
             timezone = useUTC ? 'UTC' : void 0;
         }
         // The Etc/GMT time zones do not support offsets with half-hour
@@ -3638,7 +3631,9 @@ class Time {
         this.timezone = timezone;
         // Assign default time formats from locale strings
         ['months', 'shortMonths', 'weekdays', 'shortWeekdays'].forEach((name) => {
-            const isMonth = /months/i.test(name), isShort = /short/.test(name), options = { timeZone: 'UTC' };
+            const isMonth = /months/i.test(name), isShort = /short/.test(name), options = {
+                timeZone: 'UTC'
+            };
             options[isMonth ? 'month' : 'weekday'] = isShort ? 'short' : 'long';
             this[name] = (isMonth ?
                 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] :
@@ -3679,7 +3674,12 @@ class Time {
             minute: 'numeric',
             second: 'numeric'
         }, timestamp, 'es')
-            .split(/(?:, |\/|:)/g);
+            // The ', ' splitter is for all modern browsers:
+            //      L, 6/3/2023, 14:30:00
+            // The ' ' splitter is for legacy Safari with no comma between date
+            // and time (#22445):
+            //      L, 6/3/2023 14:30:00
+            .split(/(?:, | |\/|:)/g);
         return [
             year,
             +month - 1,
@@ -3689,8 +3689,8 @@ class Time {
             seconds,
             // Milliseconds
             Math.floor(Number(timestamp) || 0) % 1000,
-            // Weekday index
-            spanishWeekdayIndex(weekday)
+            // Spanish weekday index
+            'DLMXJVS'.indexOf(weekday)
         ].map(Number);
     }
     /**
@@ -3698,7 +3698,7 @@ class Time {
      */
     dateTimeFormat(options, timestamp, locale = this.options.locale || pageLang) {
         const cacheKey = JSON.stringify(options) + locale;
-        if (Time_isString(options)) {
+        if (TimeBase_isString(options)) {
             options = this.str2dtf(options);
         }
         let dTL = this.dTLCache[cacheKey];
@@ -3709,12 +3709,12 @@ class Time {
             }
             catch (e) {
                 if (/Invalid time zone/i.test(e.message)) {
-                    Time_error(34);
+                    TimeBase_error(34);
                     options.timeZone = 'UTC';
                     dTL = new Intl.DateTimeFormat(locale, options);
                 }
                 else {
-                    Time_error(e.message, false);
+                    TimeBase_error(e.message, false);
                 }
             }
         }
@@ -3746,7 +3746,7 @@ class Time {
         };
         Object.keys(mapping).forEach((key) => {
             if (s.indexOf(key) !== -1) {
-                Time_extend(dtf, mapping[key]);
+                TimeBase_extend(dtf, mapping[key]);
             }
         });
         return dtf;
@@ -3820,7 +3820,7 @@ class Time {
      * @return   {number|undefined}          Parsed JavaScript timestamp
      */
     parse(s) {
-        if (!Time_isString(s)) {
+        if (!TimeBase_isString(s)) {
             return s ?? void 0;
         }
         s = s
@@ -3837,7 +3837,7 @@ class Time {
             s += 'Z';
         }
         const ts = Date.parse(s);
-        if (Time_isNumber(ts)) {
+        if (TimeBase_isNumber(ts)) {
             // Unless the string contains time zone information, convert from
             // the local time result of `Date.parse` via UTC into the current
             // timezone of the time object.
@@ -3865,7 +3865,7 @@ class Time {
                 .split(/(GMT|:)/)
                 .map(Number), offset = -(hours + minutes / 60) * 60 * 60000;
             // Possible future NaNs stop here
-            if (Time_isNumber(offset)) {
+            if (TimeBase_isNumber(offset)) {
                 return offset;
             }
         }
@@ -3900,6 +3900,7 @@ class Time {
      * | `%d` | Two digit day of the month, 01 to 31         |       |
      * | `%e` | Day of the month, 1 through 31               |       |
      * | `%w` | Day of the week, 0 through 6                 | N/A   |
+     * | `%v` | The prefix "week from", read from `lang.weekFrom` | N/A |
      * | `%b` | Short month, like 'Jan'                      |       |
      * | `%B` | Long month, like 'January'                   |       |
      * | `%m` | Two digit month number, 01 through 12        |       |
@@ -3981,25 +3982,25 @@ class Time {
      *         The formatted date.
      */
     dateFormat(format, timestamp, upperCaseFirst) {
-        const lang = Core_Globals.defaultOptions?.lang;
-        if (!Time_defined(timestamp) || isNaN(timestamp)) {
+        const lang = this.lang;
+        if (!TimeBase_defined(timestamp) || isNaN(timestamp)) {
             return lang?.invalidDate || '';
         }
         format = format ?? '%Y-%m-%d %H:%M:%S';
         // First, identify and replace locale-aware formats like %[Ymd]
-        if (Time_isString(format)) {
+        if (TimeBase_isString(format)) {
             const localeAwareRegex = /%\[([a-zA-Z]+)\]/g;
             let match;
             while ((match = localeAwareRegex.exec(format))) {
-                format = format.replace(match[0], this.dateTimeFormat(match[1], timestamp));
+                format = format.replace(match[0], this.dateTimeFormat(match[1], timestamp, lang?.locale));
             }
         }
         // Then, replace static formats like %Y, %m, %d etc.
-        if (Time_isString(format) && format.indexOf('%') !== -1) {
+        if (TimeBase_isString(format) && format.indexOf('%') !== -1) {
             const time = this, [fullYear, month, dayOfMonth, hours, minutes, seconds, milliseconds, weekday] = this.toParts(timestamp), langWeekdays = lang?.weekdays || this.weekdays, shortWeekdays = lang?.shortWeekdays || this.shortWeekdays, months = lang?.months || this.months, shortMonths = lang?.shortMonths || this.shortMonths, 
             // List all format keys. Custom formats can be added from the
             // outside.
-            replacements = Time_extend({
+            replacements = TimeBase_extend({
                 // Day
                 // Short weekday, like 'Mon'
                 a: shortWeekdays ?
@@ -4008,20 +4009,21 @@ class Time {
                 // Long weekday, like 'Monday'
                 A: langWeekdays[weekday],
                 // Two digit day of the month, 01 to 31
-                d: Time_pad(dayOfMonth),
+                d: TimeBase_pad(dayOfMonth),
                 // Day of the month, 1 through 31
-                e: Time_pad(dayOfMonth, 2, ' '),
+                e: TimeBase_pad(dayOfMonth, 2, ' '),
                 // Day of the week, 0 through 6
                 w: weekday,
                 // Week (none implemented)
                 // 'W': weekNumber(),
+                v: lang?.weekFrom ?? '',
                 // Month
                 // Short month, like 'Jan'
                 b: shortMonths[month],
                 // Long month, like 'January'
                 B: months[month],
                 // Two digit month number, 01 through 12
-                m: Time_pad(month + 1),
+                m: TimeBase_pad(month + 1),
                 // Month number, 1 through 12 (#8150)
                 o: month + 1,
                 // Year
@@ -4031,27 +4033,27 @@ class Time {
                 Y: fullYear,
                 // Time
                 // Two digits hours in 24h format, 00 through 23
-                H: Time_pad(hours),
+                H: TimeBase_pad(hours),
                 // Hours in 24h format, 0 through 23
                 k: hours,
                 // Two digits hours in 12h format, 00 through 11
-                I: Time_pad((hours % 12) || 12),
+                I: TimeBase_pad((hours % 12) || 12),
                 // Hours in 12h format, 1 through 12
                 l: (hours % 12) || 12,
                 // Two digits minutes, 00 through 59
-                M: Time_pad(minutes),
+                M: TimeBase_pad(minutes),
                 // Upper case AM or PM
                 p: hours < 12 ? 'AM' : 'PM',
                 // Lower case AM or PM
                 P: hours < 12 ? 'am' : 'pm',
                 // Two digits seconds, 00 through 59
-                S: Time_pad(seconds),
+                S: TimeBase_pad(seconds),
                 // Milliseconds (naming from Ruby)
-                L: Time_pad(milliseconds, 3)
+                L: TimeBase_pad(milliseconds, 3)
             }, Core_Globals.dateFormats);
             // Do the replaces
-            Time_objectEach(replacements, function (val, key) {
-                if (Time_isString(format)) {
+            TimeBase_objectEach(replacements, function (val, key) {
+                if (TimeBase_isString(format)) {
                     // Regex would do it in one line, but this is faster
                     while (format.indexOf('%' + key) !== -1) {
                         format = format.replace('%' + key, typeof val === 'function' ?
@@ -4061,13 +4063,13 @@ class Time {
                 }
             });
         }
-        else if (Time_isObject(format)) {
+        else if (TimeBase_isObject(format)) {
             const tzHours = (this.getTimezoneOffset(timestamp) || 0) /
                 (60000 * 60), timeZone = this.timezone || ('Etc/GMT' + (tzHours >= 0 ? '+' : '') + tzHours), { prefix = '', suffix = '' } = format;
-            format = prefix + this.dateTimeFormat(Time_extend({ timeZone }, format), timestamp) + suffix;
+            format = prefix + this.dateTimeFormat(TimeBase_extend({ timeZone }, format), timestamp) + suffix;
         }
         // Optionally sentence-case the string and return
-        return upperCaseFirst ? Time_ucfirst(format) : format;
+        return upperCaseFirst ? TimeBase_ucfirst(format) : format;
     }
     /**
      * Resolve legacy formats of dateTimeLabelFormats (strings and arrays) into
@@ -4079,8 +4081,8 @@ class Time {
      * The object definition
      */
     resolveDTLFormat(f) {
-        if (!Time_isObject(f, true)) { // Check for string or array
-            f = Time_splat(f);
+        if (!TimeBase_isObject(f, true)) { // Check for string or array
+            f = TimeBase_splat(f);
             return {
                 main: f[0],
                 from: f[1],
@@ -4088,154 +4090,10 @@ class Time {
             };
         }
         // Type-check DateTimeFormatOptions against DateTimeLabelFormatObject
-        if (Time_isObject(f, true) && isDateTimeFormatOptions(f)) {
+        if (TimeBase_isObject(f, true) && isDateTimeFormatOptions(f)) {
             return { main: f };
         }
         return f;
-    }
-    /**
-     * Return an array with time positions distributed on round time values
-     * right and right after min and max. Used in datetime axes as well as for
-     * grouping data on a datetime axis.
-     *
-     * @function Highcharts.Time#getTimeTicks
-     *
-     * @param {Highcharts.TimeNormalizedObject} normalizedInterval
-     *        The interval in axis values (ms) and the count
-     *
-     * @param {number} [min]
-     *        The minimum in axis values
-     *
-     * @param {number} [max]
-     *        The maximum in axis values
-     *
-     * @param {number} [startOfWeek=1]
-     *
-     * @return {Highcharts.AxisTickPositionsArray}
-     * Time positions
-     */
-    getTimeTicks(normalizedInterval, min, max, startOfWeek) {
-        const time = this, tickPositions = [], higherRanks = {}, { count = 1, unitRange } = normalizedInterval;
-        let [year, month, dayOfMonth, hours, minutes, seconds] = time.toParts(min), milliseconds = (min || 0) % 1000, variableDayLength;
-        startOfWeek ?? (startOfWeek = 1);
-        if (Time_defined(min)) { // #1300
-            milliseconds = unitRange >= Time_timeUnits.second ?
-                0 : // #3935
-                count * Math.floor(milliseconds / count);
-            if (unitRange >= Time_timeUnits.second) { // Second
-                seconds = unitRange >= Time_timeUnits.minute ?
-                    0 : // #3935
-                    count * Math.floor(seconds / count);
-            }
-            if (unitRange >= Time_timeUnits.minute) { // Minute
-                minutes = unitRange >= Time_timeUnits.hour ?
-                    0 :
-                    count * Math.floor(minutes / count);
-            }
-            if (unitRange >= Time_timeUnits.hour) { // Hour
-                hours = unitRange >= Time_timeUnits.day ?
-                    0 :
-                    count * Math.floor(hours / count);
-            }
-            if (unitRange >= Time_timeUnits.day) { // Day
-                dayOfMonth = unitRange >= Time_timeUnits.month ?
-                    1 :
-                    Math.max(1, count * Math.floor(dayOfMonth / count));
-            }
-            if (unitRange >= Time_timeUnits.month) { // Month
-                month = unitRange >= Time_timeUnits.year ? 0 :
-                    count * Math.floor(month / count);
-            }
-            if (unitRange >= Time_timeUnits.year) { // Year
-                year -= year % count;
-            }
-            // Week is a special case that runs outside the hierarchy
-            if (unitRange === Time_timeUnits.week) {
-                if (count) {
-                    min = time.makeTime(year, month, dayOfMonth, hours, minutes, seconds, milliseconds);
-                }
-                // Get start of current week, independent of count
-                const weekday = this.dateTimeFormat({
-                    timeZone: this.timezone,
-                    weekday: 'narrow'
-                }, min, 'es'), weekdayNo = spanishWeekdayIndex(weekday);
-                dayOfMonth += -weekdayNo + startOfWeek +
-                    // We don't want to skip days that are before
-                    // startOfWeek (#7051)
-                    (weekdayNo < startOfWeek ? -7 : 0);
-            }
-            min = time.makeTime(year, month, dayOfMonth, hours, minutes, seconds, milliseconds);
-            // Handle local timezone offset
-            if (time.variableTimezone && Time_defined(max)) {
-                // Detect whether we need to take the DST crossover into
-                // consideration. If we're crossing over DST, the day length may
-                // be 23h or 25h and we need to compute the exact clock time for
-                // each tick instead of just adding hours. This comes at a cost,
-                // so first we find out if it is needed (#4951).
-                variableDayLength = (
-                // Long range, assume we're crossing over.
-                max - min > 4 * Time_timeUnits.month ||
-                    // Short range, check if min and max are in different time
-                    // zones.
-                    time.getTimezoneOffset(min) !==
-                        time.getTimezoneOffset(max));
-            }
-            // Iterate and add tick positions at appropriate values
-            let t = min, i = 1;
-            while (t < max) {
-                tickPositions.push(t);
-                // Increase the years
-                if (unitRange === Time_timeUnits.year) {
-                    t = time.makeTime(year + i * count, 0);
-                    // Increase the months
-                }
-                else if (unitRange === Time_timeUnits.month) {
-                    t = time.makeTime(year, month + i * count);
-                    // If we're using local time, the interval is not fixed as it
-                    // jumps one hour at the DST crossover
-                }
-                else if (variableDayLength && (unitRange === Time_timeUnits.day ||
-                    unitRange === Time_timeUnits.week)) {
-                    t = time.makeTime(year, month, dayOfMonth +
-                        i * count * (unitRange === Time_timeUnits.day ? 1 : 7));
-                }
-                else if (variableDayLength &&
-                    unitRange === Time_timeUnits.hour &&
-                    count > 1) {
-                    // Make sure higher ranks are preserved across DST (#6797,
-                    // #7621)
-                    t = time.makeTime(year, month, dayOfMonth, hours + i * count);
-                    // Else, the interval is fixed and we use simple addition
-                }
-                else {
-                    t += unitRange * count;
-                }
-                i++;
-            }
-            // Push the last time
-            tickPositions.push(t);
-            // Handle higher ranks. Mark new days if the time is on midnight
-            // (#950, #1649, #1760, #3349). Use a reasonable dropout threshold
-            // to prevent looping over dense data grouping (#6156).
-            if (unitRange <= Time_timeUnits.hour && tickPositions.length < 10000) {
-                tickPositions.forEach((t) => {
-                    if (
-                    // Speed optimization, no need to run dateFormat unless
-                    // we're on a full or half hour
-                    t % 1800000 === 0 &&
-                        // Check for local or global midnight
-                        time.dateFormat('%H%M%S%L', t) === '000000000') {
-                        higherRanks[t] = 'day';
-                    }
-                });
-            }
-        }
-        // Record information on the chosen unit - for dynamic label formatter
-        tickPositions.info = Time_extend(normalizedInterval, {
-            higherRanks,
-            totalRange: unitRange * count
-        });
-        return tickPositions;
     }
     /**
      * Get the optimal date format for a point, based on a range.
@@ -4270,17 +4128,18 @@ class Time {
         let n = 'millisecond', 
         // For sub-millisecond data, #4223
         lastN = n;
-        for (n in Time_timeUnits) { // eslint-disable-line guard-for-in
+        for (n in TimeBase_timeUnits) { // eslint-disable-line guard-for-in
             // If the range is exactly one week and we're looking at a
             // Sunday/Monday, go for the week format
-            if (range === Time_timeUnits.week &&
+            if (range &&
+                range === TimeBase_timeUnits.week &&
                 +this.dateFormat('%w', timestamp) === startOfWeek &&
                 dateStr.substr(6) === blank.substr(6)) {
                 n = 'week';
                 break;
             }
             // The first format that is too great for the range
-            if (Time_timeUnits[n] > range) {
+            if (range && TimeBase_timeUnits[n] > range) {
                 n = lastN;
                 break;
             }
@@ -4304,7 +4163,7 @@ class Time {
  * Default export
  *
  * */
-/* harmony default export */ const Core_Time = (Time);
+/* harmony default export */ const Shared_TimeBase = (TimeBase);
 /* *
  *
  * API Declarations
@@ -4450,6 +4309,180 @@ class Time {
 */
 ''; // Keeps doclets above in JS file
 
+;// ./code/es-modules/Core/Time.js
+/* *
+ *
+ *  (c) 2010-2024 Torstein Honsi
+ *
+ *  License: www.highcharts.com/license
+ *
+ *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+ *
+ * */
+
+
+
+const { defined: Time_defined, extend: Time_extend, timeUnits: Time_timeUnits } = Core_Utilities;
+/* *
+ *
+ *  Constants
+ *
+ * */
+class Time extends Shared_TimeBase {
+    /**
+     * Return an array with time positions distributed on round time values
+     * right and right after min and max. Used in datetime axes as well as for
+     * grouping data on a datetime axis.
+     *
+     * @function Highcharts.Time#getTimeTicks
+     *
+     * @param {Highcharts.TimeNormalizedObject} normalizedInterval
+     *        The interval in axis values (ms) and the count
+     *
+     * @param {number} [min]
+     *        The minimum in axis values
+     *
+     * @param {number} [max]
+     *        The maximum in axis values
+     *
+     * @param {number} [startOfWeek=1]
+     *
+     * @return {Highcharts.AxisTickPositionsArray}
+     * Time positions
+     */
+    getTimeTicks(normalizedInterval, min, max, startOfWeek) {
+        const time = this, tickPositions = [], higherRanks = {}, { count = 1, unitRange } = normalizedInterval;
+        let [year, month, dayOfMonth, hours, minutes, seconds] = time.toParts(min), milliseconds = (min || 0) % 1000, variableDayLength;
+        startOfWeek ?? (startOfWeek = 1);
+        if (Time_defined(min)) { // #1300
+            milliseconds = unitRange >= Time_timeUnits.second ?
+                0 : // #3935
+                count * Math.floor(milliseconds / count);
+            if (unitRange >= Time_timeUnits.second) { // Second
+                seconds = unitRange >= Time_timeUnits.minute ?
+                    0 : // #3935
+                    count * Math.floor(seconds / count);
+            }
+            if (unitRange >= Time_timeUnits.minute) { // Minute
+                minutes = unitRange >= Time_timeUnits.hour ?
+                    0 :
+                    count * Math.floor(minutes / count);
+            }
+            if (unitRange >= Time_timeUnits.hour) { // Hour
+                hours = unitRange >= Time_timeUnits.day ?
+                    0 :
+                    count * Math.floor(hours / count);
+            }
+            if (unitRange >= Time_timeUnits.day) { // Day
+                dayOfMonth = unitRange >= Time_timeUnits.month ?
+                    1 :
+                    Math.max(1, count * Math.floor(dayOfMonth / count));
+            }
+            if (unitRange >= Time_timeUnits.month) { // Month
+                month = unitRange >= Time_timeUnits.year ? 0 :
+                    count * Math.floor(month / count);
+            }
+            if (unitRange >= Time_timeUnits.year) { // Year
+                year -= year % count;
+            }
+            // Week is a special case that runs outside the hierarchy
+            if (unitRange === Time_timeUnits.week) {
+                if (count) {
+                    min = time.makeTime(year, month, dayOfMonth, hours, minutes, seconds, milliseconds);
+                }
+                // Get start of current week, independent of count
+                const weekday = this.dateTimeFormat({
+                    timeZone: this.timezone,
+                    weekday: 'narrow'
+                }, min, 'es'), 
+                // Spanish weekday index
+                weekdayNo = 'DLMXJVS'.indexOf(weekday);
+                dayOfMonth += -weekdayNo + startOfWeek +
+                    // We don't want to skip days that are before
+                    // startOfWeek (#7051)
+                    (weekdayNo < startOfWeek ? -7 : 0);
+            }
+            min = time.makeTime(year, month, dayOfMonth, hours, minutes, seconds, milliseconds);
+            // Handle local timezone offset
+            if (time.variableTimezone && Time_defined(max)) {
+                // Detect whether we need to take the DST crossover into
+                // consideration. If we're crossing over DST, the day length may
+                // be 23h or 25h and we need to compute the exact clock time for
+                // each tick instead of just adding hours. This comes at a cost,
+                // so first we find out if it is needed (#4951).
+                variableDayLength = (
+                // Long range, assume we're crossing over.
+                max - min > 4 * Time_timeUnits.month ||
+                    // Short range, check if min and max are in different time
+                    // zones.
+                    time.getTimezoneOffset(min) !==
+                        time.getTimezoneOffset(max));
+            }
+            // Iterate and add tick positions at appropriate values
+            let t = min, i = 1;
+            while (t < max) {
+                tickPositions.push(t);
+                // Increase the years
+                if (unitRange === Time_timeUnits.year) {
+                    t = time.makeTime(year + i * count, 0);
+                    // Increase the months
+                }
+                else if (unitRange === Time_timeUnits.month) {
+                    t = time.makeTime(year, month + i * count);
+                    // If we're using local time, the interval is not fixed as it
+                    // jumps one hour at the DST crossover
+                }
+                else if (variableDayLength && (unitRange === Time_timeUnits.day ||
+                    unitRange === Time_timeUnits.week)) {
+                    t = time.makeTime(year, month, dayOfMonth +
+                        i * count * (unitRange === Time_timeUnits.day ? 1 : 7));
+                }
+                else if (variableDayLength &&
+                    unitRange === Time_timeUnits.hour &&
+                    count > 1) {
+                    // Make sure higher ranks are preserved across DST (#6797,
+                    // #7621)
+                    t = time.makeTime(year, month, dayOfMonth, hours + i * count);
+                    // Else, the interval is fixed and we use simple addition
+                }
+                else {
+                    t += unitRange * count;
+                }
+                i++;
+            }
+            // Push the last time
+            tickPositions.push(t);
+            // Handle higher ranks. Mark new days if the time is on midnight
+            // (#950, #1649, #1760, #3349). Use a reasonable dropout threshold
+            // to prevent looping over dense data grouping (#6156).
+            if (unitRange <= Time_timeUnits.hour && tickPositions.length < 10000) {
+                tickPositions.forEach((t) => {
+                    if (
+                    // Speed optimization, no need to run dateFormat unless
+                    // we're on a full or half hour
+                    t % 1800000 === 0 &&
+                        // Check for local or global midnight
+                        time.dateFormat('%H%M%S%L', t) === '000000000') {
+                        higherRanks[t] = 'day';
+                    }
+                });
+            }
+        }
+        // Record information on the chosen unit - for dynamic label formatter
+        tickPositions.info = Time_extend(normalizedInterval, {
+            higherRanks,
+            totalRange: unitRange * count
+        });
+        return tickPositions;
+    }
+}
+/* *
+ *
+ * Default export
+ *
+ * */
+/* harmony default export */ const Core_Time = (Time);
+
 ;// ./code/es-modules/Core/Defaults.js
 /* *
  *
@@ -4541,8 +4574,17 @@ const defaultOptions = {
      *     }
      * });
      * ```
+     *
+     * @optionparent lang
      */
     lang: {
+        weekFrom: 'week from',
+        /**
+         * The default chart title.
+         *
+         * @since next
+         */
+        chartTitle: 'Chart title',
         /**
          * The browser locale to use for date and number formatting. The actual
          * locale used for each chart is determined in three steps:
@@ -4579,6 +4621,12 @@ const defaultOptions = {
          * @type    {Array<string>}
          */
         months: void 0,
+        /**
+         * [Format string](https://www.highcharts.com/docs/chart-concepts/templating) for the default series name.
+         *
+         * @since next
+         */
+        seriesName: 'Series {add index 1}',
         /**
          * An array containing the months names in abbreviated form. Corresponds
          * to the `%b` format in `Highcharts.dateFormat()`. Defaults to
@@ -4662,6 +4710,11 @@ const defaultOptions = {
          */
         numericSymbols: ['k', 'M', 'G', 'T', 'P', 'E'],
         /**
+         * The default name for a pie slice (point).
+         * @since next
+         */
+        pieSliceName: 'Slice',
+        /**
          * The magnitude of [numericSymbols](#lang.numericSymbol) replacements.
          * Use 10000 for Japanese, Korean and various Chinese locales, which
          * use symbols for 10^4, 10^8 and 10^12.
@@ -4695,12 +4748,17 @@ const defaultOptions = {
          *
          * @since 1.2.4
          */
+        /**
+         * The default title of the Y axis
+         *
+         * @since next
+         */
+        yAxisTitle: 'Values',
         resetZoomTitle: 'Reset zoom level 1:1'
     },
     /**
-     * Global options that don't apply to each chart. These options, like
-     * the `lang` options, must be set using the `Highcharts.setOptions`
-     * method.
+     * Global options that don't apply to each chart. These options must be set
+     * using the `Highcharts.setOptions` method.
      *
      * ```js
      * Highcharts.setOptions({
@@ -5104,6 +5162,24 @@ const defaultOptions = {
      */
     subtitle: {
         /**
+         * The horizontal alignment of the subtitle. Can be one of "left",
+         * "center" and "right". Since v12, it defaults to `undefined`, meaning
+         * the actual alignment is inherited from the alignment of the main
+         * title.
+         *
+         * @sample {highcharts} highcharts/title/align-auto/
+         *         Default title and subtitle alignment, dynamic
+         * @sample {highcharts} highcharts/subtitle/align/
+         *         Footnote at right of plot area
+         * @sample {highstock} stock/chart/subtitle-footnote
+         *         Footnote at bottom right of plot area
+         *
+         * @type  {Highcharts.AlignValue}
+         * @default undefined
+         * @since 2.0
+         * @apioption subtitle.align
+         */
+        /**
          * When the subtitle is floating, the plot area will not move to make
          * space for it.
          *
@@ -5225,24 +5301,6 @@ const defaultOptions = {
          *         Formatted and linked text.
          */
         text: ''
-        /**
-         * The horizontal alignment of the subtitle. Can be one of "left",
-         * "center" and "right". Since v12, it defaults to `undefined`, meaning
-         * the actual alignment is inherited from the alignment of the main
-         * title.
-         *
-         * @sample {highcharts} highcharts/title/align-auto/
-         *         Default title and subtitle alignment, dynamic
-         * @sample {highcharts} highcharts/subtitle/align/
-         *         Footnote at right of plot area
-         * @sample {highstock} stock/chart/subtitle-footnote
-         *         Footnote at bottom right of plot area
-         *
-         * @type  {Highcharts.AlignValue}
-         * @default undefined
-         * @since 2.0
-         * @apioption subtitle.align
-         */
     },
     /**
      * The chart's caption, which will render below the chart and will be part
@@ -6683,7 +6741,7 @@ const defaultOptions = {
             /** @internal */
             day: '%[AebY]',
             /** @internal */
-            week: 'Week from %[AebY]',
+            week: '%v %[AebY]',
             /** @internal */
             month: '%[BY]',
             /** @internal */
@@ -7074,7 +7132,7 @@ const defaultOptions = {
         text: 'Highcharts.com'
     }
 };
-const defaultTime = new Core_Time(defaultOptions.time);
+const defaultTime = new Core_Time(defaultOptions.time, defaultOptions.lang);
 /**
  * Get the updated default options. Until 3.0.7, merely exposing defaultOptions
  * for outside modules wasn't enough because the setOptions method created a new
@@ -7114,6 +7172,12 @@ function setOptions(options) {
         defaultTime.update({
             locale: options.lang.locale
         });
+    }
+    if (options.lang?.chartTitle) {
+        defaultOptions.title = {
+            ...defaultOptions.title,
+            text: options.lang.chartTitle
+        };
     }
     return defaultOptions;
 }
@@ -7733,7 +7797,7 @@ class Fx {
      *
      */
     dSetter() {
-        const paths = this.paths, start = paths && paths[0], end = paths && paths[1], now = this.now || 0;
+        const paths = this.paths, start = paths?.[0], end = paths?.[1], now = this.now || 0;
         let path = [];
         // Land on the final path without adjustment points appended in the ends
         if (now === 1 || !start || !end) {
@@ -7915,7 +7979,7 @@ class Fx {
         isArea = elem.isArea, positionFactor = isArea ? 2 : 1, disableAnimation = fromD &&
             toD.length > fromD.length &&
             toD.hasStackedCliffs; // #16925
-        let shift, fullLength, i, reverse, start = fromD && fromD.slice(); // Copy
+        let shift, fullLength, i, reverse, start = fromD?.slice(); // Copy
         if (!start || disableAnimation) {
             return [end, end];
         }
@@ -8943,18 +9007,19 @@ function dateFormat(format, timestamp, upperCaseFirst) {
  *        The context, a collection of key-value pairs where each key is
  *        replaced by its value.
  *
- * @param {Highcharts.Chart} [chart]
- *        A `Chart` instance used to get numberFormatter and time.
+ * @param {Highcharts.Chart} [owner]
+ *        A `Chart` or `DataGrid` instance used to get numberFormatter and time.
  *
  * @return {string}
  *         The formatted string.
  */
-function format(str = '', ctx, chart) {
-    const regex = /\{([\p{L}\d:\.,;\-\/<>\[\]%_@+"'’= #\(\)]+)\}/gu, 
+function format(str = '', ctx, owner) {
+    // Notice: using u flag will require a refactor for ES5 (#22450).
+    const regex = /\{([a-zA-Z\u00C0-\u017F\d:\.,;\-\/<>\[\]%_@+"'’= #\(\)]+)\}/g, // eslint-disable-line max-len
     // The sub expression regex is the same as the top expression regex,
     // but except parens and block helpers (#), and surrounded by parens
     // instead of curly brackets.
-    subRegex = /\(([\p{L}\d:\.,;\-\/<>\[\]%_@+"'= ]+)\)/gu, matches = [], floatRegex = /f$/, decRegex = /\.(\d)/, lang = chart?.options.lang || Templating_defaultOptions.lang, time = chart && chart.time || Templating_defaultTime, numberFormatter = chart && chart.numberFormatter || numberFormat;
+    subRegex = /\(([a-zA-Z\u00C0-\u017F\d:\.,;\-\/<>\[\]%_@+"'= ]+)\)/g, matches = [], floatRegex = /f$/, decRegex = /\.(\d)/, lang = owner?.options?.lang || Templating_defaultOptions.lang, time = owner?.time || Templating_defaultTime, numberFormatter = owner?.numberFormatter || numberFormat;
     /*
      * Get a literal or variable value inside a template expression. May be
      * extended with other types like string or null if needed, but keep it
@@ -8988,7 +9053,7 @@ function format(str = '', ctx, chart) {
             match = subMatch;
             hasSub = true;
         }
-        if (!currentMatch || !currentMatch.isBlock) {
+        if (!currentMatch?.isBlock) {
             currentMatch = {
                 ctx,
                 expression: match[1],
@@ -9080,7 +9145,7 @@ function format(str = '', ctx, chart) {
             // Block helpers may return true or false. They may also return a
             // string, like the `each` helper.
             if (match.isBlock && typeof replacement === 'boolean') {
-                replacement = format(replacement ? body : elseBody, ctx, chart);
+                replacement = format(replacement ? body : elseBody, ctx, owner);
             }
             // Simple variable replacement
         }
@@ -9110,7 +9175,7 @@ function format(str = '', ctx, chart) {
         }
         str = str.replace(match.find, Templating_pick(replacement, ''));
     });
-    return hasSub ? format(str, ctx, chart) : str;
+    return hasSub ? format(str, ctx, owner) : str;
 }
 /**
  * Format a number and return a string based on input settings.
@@ -10256,8 +10321,8 @@ class SVGElement {
         if (strokeWidth === 'inherit') {
             strokeWidth = 1;
         }
-        value = value && value.toLowerCase();
         if (value) {
+            value = value.toLowerCase();
             const v = value
                 .replace('shortdashdotdot', '3,1,1,1,1,1,')
                 .replace('shortdashdot', '3,1,1,1')
@@ -10316,8 +10381,7 @@ class SVGElement {
         wrapper.safeRemoveChild(element);
         // In case of useHTML, clean up empty containers emulating SVG groups
         // (#1960, #2393, #2697).
-        while (parentToClean &&
-            parentToClean.div &&
+        while (parentToClean?.div &&
             parentToClean.div.childNodes.length === 0) {
             grandParent = parentToClean.parentGroup;
             wrapper.safeRemoveChild(parentToClean.div);
@@ -10356,7 +10420,7 @@ class SVGElement {
             }
             this.pathArray = value;
             value = value.reduce((acc, seg, i) => {
-                if (!seg || !seg.join) {
+                if (!seg?.join) {
                     return (seg || '').toString();
                 }
                 return (i ? acc + ' ' : '') + seg.join(' ');
@@ -10797,11 +10861,11 @@ class SVGElement {
      */
     setRadialReference(coordinates) {
         const existingGradient = (this.element.gradient &&
-            this.renderer.gradients[this.element.gradient]);
+            this.renderer.gradients[this.element.gradient]) || void 0;
         this.element.radialReference = coordinates;
         // On redrawing objects with an existing gradient, the gradient needs
         // to be repositioned (#3801)
-        if (existingGradient && existingGradient.radAttr) {
+        if (existingGradient?.radAttr) {
             existingGradient.animate(this.renderer.getRadialAttr(coordinates, existingGradient.radAttr));
         }
         return this;
@@ -11786,15 +11850,21 @@ const { defined: Symbols_defined, isNumber: Symbols_isNumber, pick: Symbols_pick
 function arc(cx, cy, w, h, options) {
     const arc = [];
     if (options) {
-        const start = options.start || 0, rx = Symbols_pick(options.r, w), ry = Symbols_pick(options.r, h || w), 
+        let start = options.start || 0, end = options.end || 0;
+        const rx = Symbols_pick(options.r, w), ry = Symbols_pick(options.r, h || w), 
         // Subtract a small number to prevent cos and sin of start and end
         // from becoming equal on 360 arcs (#1561). The size of the circle
         // affects the constant, therefore the division by `rx`. If the
         // proximity is too small, the arc disappears. If it is too great, a
         // gap appears. This can be seen in the animation of the official
-        // bubble demo (#20586).
-        proximity = 0.0002 / (options.borderRadius ? 1 : Math.max(rx, 1)), fullCircle = (Math.abs((options.end || 0) - start - 2 * Math.PI) <
-            proximity), end = (options.end || 0) - (fullCircle ? proximity : 0), innerRadius = options.innerR, open = Symbols_pick(options.open, fullCircle), cosStart = Math.cos(start), sinStart = Math.sin(start), cosEnd = Math.cos(end), sinEnd = Math.sin(end), 
+        // bubble demo (#20585).
+        proximity = 0.0002 / (options.borderRadius ? 1 : Math.max(rx, 1)), fullCircle = (Math.abs(end - start - 2 * Math.PI) <
+            proximity);
+        if (fullCircle) {
+            start = Math.PI / 2;
+            end = Math.PI * 2.5 - proximity;
+        }
+        const innerRadius = options.innerR, open = Symbols_pick(options.open, fullCircle), cosStart = Math.cos(start), sinStart = Math.sin(start), cosEnd = Math.cos(end), sinEnd = Math.sin(end), 
         // Proximity takes care of rounding errors around PI (#6971)
         longArc = Symbols_pick(options.longArc, end - start - Math.PI < proximity ? 0 : 1);
         let arcSegment = [
@@ -11853,7 +11923,7 @@ function arc(cx, cy, w, h, options) {
  * Callout shape used for default tooltips.
  */
 function callout(x, y, w, h, options) {
-    const arrowLength = 6, halfDistance = 6, r = Math.min((options && options.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options && options.anchorX, anchorY = options && options.anchorY || 0;
+    const arrowLength = 6, halfDistance = 6, r = Math.min((options?.r) || 0, w, h), safeDistance = r + halfDistance, anchorX = options?.anchorX, anchorY = options?.anchorY || 0;
     const path = roundedRect(x, y, w, h, { r });
     if (!Symbols_isNumber(anchorX)) {
         return path;
@@ -11938,7 +12008,7 @@ function diamond(x, y, w, h) {
  *
  */
 function rect(x, y, w, h, options) {
-    if (options && options.r) {
+    if (options?.r) {
         return roundedRect(x, y, w, h, options);
     }
     return [
@@ -12042,11 +12112,11 @@ class TextBuilder {
         this.renderer = svgElement.renderer;
         this.svgElement = svgElement;
         this.width = svgElement.textWidth;
-        this.textLineHeight = textStyles && textStyles.lineHeight;
-        this.textOutline = textStyles && textStyles.textOutline;
-        this.ellipsis = Boolean(textStyles && textStyles.textOverflow === 'ellipsis');
+        this.textLineHeight = textStyles?.lineHeight;
+        this.textOutline = textStyles?.textOutline;
+        this.ellipsis = Boolean(textStyles?.textOverflow === 'ellipsis');
         this.lineClamp = textStyles?.lineClamp;
-        this.noWrap = Boolean(textStyles && textStyles.whiteSpace === 'nowrap');
+        this.noWrap = Boolean(textStyles?.whiteSpace === 'nowrap');
     }
     /**
      * Build an SVG representation of the pseudo HTML given in the object's
@@ -12313,7 +12383,7 @@ class TextBuilder {
                 }
             }
             // Modify styling
-            if (style && style.color) {
+            if (style?.color) {
                 style.fill = style.color;
             }
             // Handle breaks
@@ -12322,7 +12392,7 @@ class TextBuilder {
                 node.textContent = '\u200B'; // Zero-width space
                 // Trim whitespace off the beginning of new lines
                 const nextNode = nodes[i + 1];
-                if (nextNode && nextNode.textContent) {
+                if (nextNode?.textContent) {
                     nextNode.textContent =
                         nextNode.textContent.replace(/^ +/gm, '');
                 }
@@ -12638,7 +12708,7 @@ class SVGRenderer {
         this.url = this.getReferenceURL();
         // Add description
         const desc = this.createElement('desc').add();
-        desc.element.appendChild(SVGRenderer_doc.createTextNode('Created with Highcharts 12.1.2'));
+        desc.element.appendChild(SVGRenderer_doc.createTextNode('Created with Highcharts 12.1.2-modified'));
         this.defs = this.createElement('defs').add();
         this.allowHTML = allowHTML;
         this.forExport = forExport;
@@ -12769,7 +12839,7 @@ class SVGRenderer {
                     zIndex: 9e5
                 });
                 const hitElement = SVGRenderer_doc.elementFromPoint(6, 6);
-                hasInternalReferenceBug = (hitElement && hitElement.id) === 'hitme';
+                hasInternalReferenceBug = hitElement?.id === 'hitme';
                 SVGRenderer_doc.body.removeChild(svg);
             }
             if (hasInternalReferenceBug) {
@@ -13102,7 +13172,7 @@ class SVGRenderer {
             .on('touchstart', (e) => e.stopPropagation())
             .on('click', function (e) {
             if (curState !== 3) {
-                callback.call(label, e);
+                callback?.call(label, e);
             }
         });
     }
@@ -13552,8 +13622,8 @@ class SVGRenderer {
             // The image width is not always the same as the symbol width. The
             // image may be centered within the symbol, as is the case when
             // image shapes are used as label backgrounds, for example in flags.
-            img.imgwidth = SVGRenderer_pick(options && options.width, symbolSizes[imageSrc] && symbolSizes[imageSrc].width);
-            img.imgheight = SVGRenderer_pick(options && options.height, symbolSizes[imageSrc] && symbolSizes[imageSrc].height);
+            img.imgwidth = SVGRenderer_pick(options?.width, symbolSizes[imageSrc]?.width);
+            img.imgheight = SVGRenderer_pick(options?.height, symbolSizes[imageSrc]?.height);
             /**
              * Set the size and position
              */
@@ -14502,6 +14572,7 @@ class HTMLElement extends SVG_SVGElement {
                 fontSize: renderer.style.fontSize
             })
         });
+        this.element.style.whiteSpace = 'nowrap';
     }
     /**
      * Get the correction in X and Y positioning as the element is rotated.
@@ -14531,6 +14602,7 @@ class HTMLElement extends SVG_SVGElement {
         // Some properties require other properties to be set
         if (styles?.textOverflow === 'ellipsis') {
             styles.overflow = 'hidden';
+            styles.whiteSpace = 'nowrap';
         }
         if (styles?.lineClamp) {
             styles.display = '-webkit-box';
@@ -14578,7 +14650,7 @@ class HTMLElement extends SVG_SVGElement {
             this.alignOnAdd = true;
             return;
         }
-        const { element, renderer, rotation, rotationOriginX, rotationOriginY, scaleX, scaleY, styles, textAlign = 'left', textWidth, translateX = 0, translateY = 0, x = 0, y = 0 } = this, { display = 'block', whiteSpace } = styles;
+        const { element, renderer, rotation, rotationOriginX, rotationOriginY, scaleX, scaleY, styles: { display = 'block', whiteSpace }, textAlign = 'left', textWidth, translateX = 0, translateY = 0, x = 0, y = 0 } = this;
         // Get the pixel length of the text
         const getTextPxLength = () => {
             if (this.textPxLength) {
@@ -14611,19 +14683,21 @@ class HTMLElement extends SVG_SVGElement {
             // Calling offsetWidth affects rendering time as it forces layout
             // (#7656).
             if (textWidth !== this.oldTextWidth) { // #983, #1254
-                const textPxLength = getTextPxLength(), textWidthNum = textWidth || 0;
-                if (((textWidthNum > this.oldTextWidth) ||
-                    textPxLength > textWidthNum) && (
+                const textPxLength = getTextPxLength(), textWidthNum = textWidth || 0, willOverWrap = element.style.textOverflow === '' &&
+                    element.style.webkitLineClamp;
+                if ((textWidthNum > this.oldTextWidth ||
+                    textPxLength > textWidthNum ||
+                    willOverWrap) && (
                 // Only set the width if the text is able to word-wrap,
                 // or text-overflow is ellipsis (#9537)
-                /[ \-]/.test(element.textContent || element.innerText) ||
+                /[\-\s\u00AD]/.test(element.textContent || element.innerText) ||
                     element.style.textOverflow === 'ellipsis')) {
+                    const usePxWidth = rotation || scaleX ||
+                        textPxLength > textWidthNum ||
+                        // Set width to prevent over-wrapping (#22609)
+                        willOverWrap;
                     HTMLElement_css(element, {
-                        width: ((textPxLength > textWidthNum) ||
-                            rotation ||
-                            scaleX) ?
-                            textWidth + 'px' :
-                            'auto', // #16261
+                        width: usePxWidth ? textWidth + 'px' : 'auto', // #16261
                         display,
                         whiteSpace: whiteSpace || 'normal' // #3331
                     });
@@ -17592,32 +17666,32 @@ var AxisDefaults;
          */
         startOnTick: true,
         title: {
-            /**
-             * The pixel distance between the axis labels and the title.
-             * Positive values are outside the axis line, negative are inside.
-             *
-             * @sample {highcharts} highcharts/xaxis/title-margin/
-             *         Y axis title margin of 60
-             *
-             * @type      {number}
-             * @default   40
-             * @apioption yAxis.title.margin
-             */
-            /**
-             * The actual text of the axis title. Horizontal texts can contain
-             * HTML, but rotated texts are painted using vector techniques and
-             * must be clean text. The Y axis title is disabled by setting the
-             * `text` option to `undefined`.
-             *
-             * @sample {highcharts} highcharts/xaxis/title-text/
-             *         Custom HTML
-             *
-             * @type    {string|null}
-             * @default {highcharts} Values
-             * @default {highstock} undefined
-             * @product highcharts highstock gantt
-             */
-            text: 'Values'
+        /**
+         * The pixel distance between the axis labels and the title.
+         * Positive values are outside the axis line, negative are inside.
+         *
+         * @sample {highcharts} highcharts/xaxis/title-margin/
+         *         Y axis title margin of 60
+         *
+         * @type      {number}
+         * @default   40
+         * @apioption yAxis.title.margin
+         */
+        /**
+         * The actual text of the axis title. Horizontal texts can contain
+         * HTML, but rotated texts are painted using vector techniques and
+         * must be clean text. The Y axis title is disabled by setting the
+         * `text` option to `undefined`. The default value is overriden by
+         * the `lang.yAxisTitle` language option.
+         *
+         * @sample {highcharts} highcharts/xaxis/title-text/
+         *         Custom HTML
+         *
+         * @type    {string|undefined}
+         * @default {highcharts} Values
+         * @default {highstock} undefined
+         * @product highcharts highstock gantt
+         */
         },
         /**
          * The top position of the Y axis. If it's a number, it is interpreted
@@ -17973,7 +18047,7 @@ class Tick {
      * @function Highcharts.Tick#addLabel
      */
     addLabel() {
-        const tick = this, axis = tick.axis, options = axis.options, chart = axis.chart, categories = axis.categories, log = axis.logarithmic, names = axis.names, pos = tick.pos, labelOptions = Tick_pick(tick.options && tick.options.labels, options.labels), tickPositions = axis.tickPositions, isFirst = pos === tickPositions[0], isLast = pos === tickPositions[tickPositions.length - 1], animateLabels = (!labelOptions.step || labelOptions.step === 1) &&
+        const tick = this, axis = tick.axis, options = axis.options, chart = axis.chart, categories = axis.categories, log = axis.logarithmic, names = axis.names, pos = tick.pos, labelOptions = Tick_pick(tick.options?.labels, options.labels), tickPositions = axis.tickPositions, isFirst = pos === tickPositions[0], isLast = pos === tickPositions[tickPositions.length - 1], animateLabels = (!labelOptions.step || labelOptions.step === 1) &&
             axis.tickInterval === 1, tickPositionInfo = tickPositions.info;
         let label = tick.label, dateTimeLabelFormat, dateTimeLabelFormats, i;
         // The context value
@@ -18043,7 +18117,7 @@ class Tick {
         };
         const str = labelFormatter.call(ctx, ctx);
         // Set up conditional formatting based on the format list if existing.
-        const list = dateTimeLabelFormats && dateTimeLabelFormats.list;
+        const list = dateTimeLabelFormats?.list;
         if (list) {
             tick.shortenLabel = function () {
                 for (i = 0; i < list.length; i++) {
@@ -18293,7 +18367,7 @@ class Tick {
             // need to set a new one because the reported labelWidth will be
             // limited by the box (#3938).
             if (labelWidth > modifiedSlotWidth ||
-                (axis.autoRotation && (label.styles || {}).width)) {
+                (axis.autoRotation && label?.styles?.width)) {
                 textWidth = modifiedSlotWidth;
             }
             // Add ellipsis to prevent rotated labels to be clipped against the edge
@@ -18370,17 +18444,16 @@ class Tick {
      */
     render(index, old, opacity) {
         const tick = this, axis = tick.axis, horiz = axis.horiz, pos = tick.pos, tickmarkOffset = Tick_pick(tick.tickmarkOffset, axis.tickmarkOffset), xy = tick.getPosition(horiz, pos, tickmarkOffset, old), x = xy.x, y = xy.y, axisStart = axis.pos, axisEnd = axisStart + axis.len, pxPos = horiz ? x : y;
+        const labelOpacity = Tick_pick(opacity, tick.label?.newOpacity, // #15528
+        1);
         // Anything that is not between `axis.pos` and `axis.pos + axis.length`
         // should not be visible (#20166). The `correctFloat` is for reversed
         // axes in Safari.
         if (!axis.chart.polar &&
-            tick.isNew &&
             (Tick_correctFloat(pxPos) < axisStart || pxPos > axisEnd)) {
             opacity = 0;
         }
-        const labelOpacity = Tick_pick(opacity, tick.label && tick.label.newOpacity, // #15528
-        1);
-        opacity = Tick_pick(opacity, 1);
+        opacity ?? (opacity = 1);
         this.isActive = true;
         // Create the grid line
         this.renderGridLine(old, opacity);
@@ -18928,7 +19001,14 @@ class Axis {
                     rotation: 90 * this.side
                 }
             };
-        this.options = Axis_merge(sideSpecific, Axis_defaultOptions[this.coll], userOptions);
+        this.options = Axis_merge(sideSpecific, 
+        // Merge in the default title for y-axis, which changes with
+        // language settings
+        this.coll === 'yAxis' ? {
+            title: {
+                text: this.chart.options.lang.yAxisTitle
+            }
+        } : {}, Axis_defaultOptions[this.coll], userOptions);
         Axis_fireEvent(this, 'afterSetOptions', { userOptions });
     }
     /**
@@ -18955,7 +19035,7 @@ class Axis {
         numericSymbolDetector = axis.logarithmic ?
             Math.abs(value) :
             axis.tickInterval;
-        let i = numericSymbols && numericSymbols.length, multi, ret;
+        let i = numericSymbols?.length, multi, ret;
         if (categories) {
             ret = `${this.value}`;
         }
@@ -19627,7 +19707,7 @@ class Axis {
                 });
             }
             // Record minPointOffset and pointRangePadding
-            ordinalCorrection = (axis.ordinal && axis.ordinal.slope && closestPointRange) ?
+            ordinalCorrection = (axis.ordinal?.slope && closestPointRange) ?
                 axis.ordinal.slope / closestPointRange :
                 1; // #988, #1853
             axis.minPointOffset = minPointOffset =
@@ -19640,7 +19720,7 @@ class Axis {
             // The `closestPointRange` is the closest distance between points.
             // In columns it is mostly equal to pointRange, but in lines
             // pointRange is 0 while closestPointRange is some other value
-            if (isXAxis && closestPointRange) {
+            if (isXAxis) {
                 axis.closestPointRange = closestPointRange;
             }
         }
@@ -19870,7 +19950,9 @@ class Axis {
         dateTime &&
             !axis.series.some((s) => !s.sorted) ?
             axis.closestPointRange : 0);
-        if (!tickIntervalOption && axis.tickInterval < minTickInterval) {
+        if (!tickIntervalOption &&
+            minTickInterval &&
+            axis.tickInterval < minTickInterval) {
             axis.tickInterval = minTickInterval;
         }
         // For linear axes, normalize the interval
@@ -20028,7 +20110,10 @@ class Axis {
     trimTicks(tickPositions, startOnTick, endOnTick) {
         const roundedMin = tickPositions[0], roundedMax = tickPositions[tickPositions.length - 1], minPointOffset = (!this.isOrdinal && this.minPointOffset) || 0; // (#12716)
         Axis_fireEvent(this, 'trimTicks');
-        if (!this.isLinked) {
+        if (!this.isLinked ||
+            // Linked non-grid axes should trim ticks, #21743.
+            // Grid axis has custom handling of ticks.
+            !this.grid) {
             if (startOnTick && roundedMin !== -Infinity) { // #6502
                 this.min = roundedMin;
             }
@@ -20302,20 +20387,20 @@ class Axis {
             // When x axis is dirty, we need new data extremes for y as
             // well:
             isXAxisDirty = (isXAxisDirty ||
-                (series.xAxis && series.xAxis.isDirty) ||
+                series.xAxis?.isDirty ||
                 false);
         });
         // Set the new axisLength
         axis.setAxisSize();
-        const isDirtyAxisLength = axis.len !== (axis.old && axis.old.len);
+        const isDirtyAxisLength = axis.len !== axis.old?.len;
         // Do we really need to go through all this?
         if (isDirtyAxisLength ||
             isDirtyData ||
             isXAxisDirty ||
             axis.isLinked ||
             axis.forceRedraw ||
-            axis.userMin !== (axis.old && axis.old.userMin) ||
-            axis.userMax !== (axis.old && axis.old.userMax) ||
+            axis.userMin !== axis.old?.userMin ||
+            axis.userMax !== axis.old?.userMax ||
             axis.alignToOthers()) {
             if (stacking && coll === 'yAxis') {
                 stacking.buildStacks();
@@ -20730,7 +20815,7 @@ class Axis {
         }
         // Apply general and specific CSS
         tickPositions.forEach(function (pos) {
-            const tick = ticks[pos], label = tick && tick.label, widthOption = labelStyleOptions.width, css = {};
+            const tick = ticks[pos], label = tick?.label, widthOption = labelStyleOptions.width, css = {};
             if (label) {
                 // This needs to go before the CSS in old IE (#4502)
                 label.attr(attr);
@@ -20967,7 +21052,7 @@ class Axis {
             const tickSize = this.tickSize('tick');
             axisOffset[side] = Math.max(axisOffset[side], (axis.axisTitleMargin || 0) + titleOffset +
                 directionFactor * axis.offset, labelOffsetPadded, // #3027
-            tickPositions && tickPositions.length && tickSize ?
+            tickPositions?.length && tickSize ?
                 tickSize[0] + directionFactor * axis.offset :
                 0 // #4866
             );
@@ -21128,7 +21213,7 @@ class Axis {
         // Linked axes need an extra check to find out if
         if (!isLinked ||
             (pos >= axis.min && pos <= axis.max) ||
-            (axis.grid && axis.grid.isColumn)) {
+            axis.grid?.isColumn) {
             if (!ticks[pos]) {
                 ticks[pos] = new Axis_Tick(axis, pos);
             }
@@ -21283,7 +21368,7 @@ class Axis {
             axisTitle.isNew = false;
         }
         // Stacked totals:
-        if (stackLabelOptions && stackLabelOptions.enabled && axis.stacking) {
+        if (stackLabelOptions?.enabled && axis.stacking) {
             axis.stacking.renderStackTotals();
         }
         // End stacked totals
@@ -21396,13 +21481,13 @@ class Axis {
      * @emits Highcharts.Axis#event:drawCrosshair
      */
     drawCrosshair(e, point) {
-        const options = this.crosshair, snap = Axis_pick(options && options.snap, true), chart = this.chart;
+        const options = this.crosshair, snap = options?.snap ?? true, chart = this.chart;
         let path, pos, categorized, graphic = this.cross, crossOptions;
         Axis_fireEvent(this, 'drawCrosshair', { e: e, point: point });
         // Use last available event when updating non-snapped crosshairs without
         // mouse interaction (#5287)
         if (!e) {
-            e = this.cross && this.cross.e;
+            e = this.cross?.e;
         }
         if (
         // Disabled in options
@@ -21440,8 +21525,8 @@ class Axis {
                     // polar chart
                     Axis_extend(crossOptions, {
                         isCrosshair: true,
-                        chartX: e && e.chartX,
-                        chartY: e && e.chartY,
+                        chartX: e?.chartX,
+                        chartY: e?.chartY,
                         point: point
                     });
                 }
@@ -22470,7 +22555,7 @@ var PlotLineOrBandAxis;
             ]).forEach(function (arr) {
                 i = arr.length;
                 while (i--) {
-                    if ((arr[i] || {}).id === id) {
+                    if (arr[i]?.id === id) {
                         PlotLineOrBandAxis_erase(arr, arr[i]);
                     }
                 }
@@ -23544,7 +23629,7 @@ class Tooltip {
      */
     cleanSplit(force) {
         this.chart.series.forEach(function (series) {
-            const tt = series && series.tt;
+            const tt = series?.tt;
             if (tt) {
                 if (!tt.isActive || force) {
                     series.tt = tt.destroy();
@@ -23613,8 +23698,7 @@ class Tooltip {
         points = Tooltip_splat(points);
         // If reversedStacks are false the tooltip position should be taken from
         // the last point (#17948)
-        if (points[0].series &&
-            points[0].series.yAxis &&
+        if (points[0].series?.yAxis &&
             !points[0].series.yAxis.options.reversedStacks) {
             points = points.slice().reverse();
         }
@@ -23676,7 +23760,7 @@ class Tooltip {
             isHeader && 'highcharts-tooltip-header',
             isSplit ? 'highcharts-tooltip-box' : 'highcharts-tooltip',
             !isHeader && 'highcharts-color-' + Tooltip_pick(point.colorIndex, series.colorIndex),
-            (seriesOptions && seriesOptions.className)
+            seriesOptions?.className
         ].filter(Tooltip_isString).join(' ');
     }
     /**
@@ -23719,7 +23803,7 @@ class Tooltip {
                     position: 'absolute',
                     top: '1px',
                     pointerEvents: 'none',
-                    zIndex: Math.max(this.options.style.zIndex || 0, (chartStyle && chartStyle.zIndex || 0) + 3)
+                    zIndex: Math.max(this.options.style.zIndex || 0, (chartStyle?.zIndex || 0) + 3)
                 });
                 /**
                  * Reference to the tooltip's renderer, when
@@ -24087,6 +24171,10 @@ class Tooltip {
             attr.anchorX = anchorX;
             attr.anchorY = anchorY;
         }
+        else {
+            // Clear anchor with NaN to prevent animation (#22295)
+            attr.anchorX = attr.anchorY = NaN;
+        }
         animation.step = () => tooltip.drawTracker();
         tooltip.getLabel().animate(attr, animation);
     }
@@ -24243,7 +24331,7 @@ class Tooltip {
         };
         const tooltipLabel = tooltip.getLabel();
         const ren = this.renderer || chart.renderer;
-        const headerTop = Boolean(chart.xAxis[0] && chart.xAxis[0].opposite);
+        const headerTop = Boolean(chart.xAxis[0]?.opposite);
         const { left: chartLeft, top: chartTop } = pointer.getChartPosition();
         let distributionBoxTop = plotTop + scrollTop;
         let headerHeight = 0;
@@ -24595,7 +24683,7 @@ class Tooltip {
      * @function Highcharts.Tooltip#headerFooterFormatter
      */
     headerFooterFormatter(point, isFooter) {
-        const series = point.series, tooltipOptions = series.tooltipOptions, xAxis = series.xAxis, dateTime = xAxis && xAxis.dateTime, e = {
+        const series = point.series, tooltipOptions = series.tooltipOptions, xAxis = series.xAxis, dateTime = xAxis?.dateTime, e = {
             isFooter,
             point
         };
@@ -24614,7 +24702,7 @@ class Tooltip {
                     xDateFormat = '%0';
                 }
                 (point.tooltipDateKeys || ['key']).forEach((key) => {
-                    formatString = formatString.replace(new RegExp('point\\.' + key + '([ \\)}])', ''), `(point.${key}:${xDateFormat})$1`);
+                    formatString = formatString.replace(new RegExp('point\\.' + key + '([ \\)}])'), `(point.${key}:${xDateFormat})$1`);
                 });
             }
             // Replace default header style with class name
@@ -24893,6 +24981,12 @@ class Point {
      * @type {number|undefined}
      */
     /**
+     * Array of all hovered points when using shared tooltips.
+     *
+     * @name Highcharts.Point#points
+     * @type {Array<Highcharts.Point>|undefined}
+     */
+    /**
      * The series object associated with the point.
      *
      * @name Highcharts.Point#series
@@ -25072,7 +25166,7 @@ class Point {
                 point.onMouseOut();
             }
             // Remove properties after animation
-            if (!dataSorting || !dataSorting.enabled) {
+            if (!dataSorting?.enabled) {
                 destroyPoint();
             }
             else {
@@ -25097,7 +25191,7 @@ class Point {
         });
         props.plural.forEach(function (plural) {
             point[plural].forEach(function (item) {
-                if (item && item.element) {
+                if (item?.element) {
                     item.destroy();
                 }
             });
@@ -25155,8 +25249,9 @@ class Point {
             (typeof point.colorIndex !== 'undefined' ?
                 ' highcharts-color-' + point.colorIndex : '') +
             (point.options.className ? ' ' + point.options.className : '') +
-            (point.zone && point.zone.className ? ' ' +
-                point.zone.className.replace('highcharts-negative', '') : '');
+            (point.zone?.className ?
+                ' ' + point.zone.className.replace('highcharts-negative', '') :
+                '');
     }
     /**
      * Get props of all existing graphical point elements.
@@ -25225,7 +25320,7 @@ class Point {
         if (!this.nonZonedColor) {
             this.nonZonedColor = this.color;
         }
-        if (zone && zone.color && !this.options.color) {
+        if (zone?.color && !this.options.color) {
             this.color = zone.color;
         }
         else {
@@ -25554,7 +25649,7 @@ class Point {
             }
             if (Point_isObject(options, true)) {
                 // Destroy so we can get new elements
-                if (graphic && graphic.element) {
+                if (graphic?.element) {
                     // "null" is also a valid symbol
                     if (options &&
                         options.marker &&
@@ -25785,9 +25880,8 @@ class Point {
     setState(state, move) {
         const point = this, series = point.series, previousState = point.state, stateOptions = (series.options.states[state || 'normal'] ||
             {}), markerOptions = (Point_defaultOptions.plotOptions[series.type].marker &&
-            series.options.marker), normalDisabled = (markerOptions && markerOptions.enabled === false), markerStateOptions = ((markerOptions &&
-            markerOptions.states &&
-            markerOptions.states[state || 'normal']) || {}), stateDisabled = markerStateOptions.enabled === false, pointMarker = point.marker || {}, chart = series.chart, hasMarkers = (markerOptions && series.markerAttribs);
+            series.options.marker), normalDisabled = (markerOptions && markerOptions.enabled === false), markerStateOptions = markerOptions?.states?.[state || 'normal'] ||
+            {}, stateDisabled = markerStateOptions.enabled === false, pointMarker = point.marker || {}, chart = series.chart, hasMarkers = (markerOptions && series.markerAttribs);
         let halo = series.halo, markerAttribs, pointAttribs, pointAttribsAnimation, stateMarkerGraphic = series.stateMarkerGraphic, newSymbol;
         state = state || ''; // Empty string
         if (
@@ -25895,9 +25989,8 @@ class Point {
         // Show me your halo
         const haloOptions = stateOptions.halo;
         const markerGraphic = (point.graphic || stateMarkerGraphic);
-        const markerVisibility = (markerGraphic && markerGraphic.visibility || 'inherit');
-        if (haloOptions &&
-            haloOptions.size &&
+        const markerVisibility = markerGraphic?.visibility || 'inherit';
+        if (haloOptions?.size &&
             markerGraphic &&
             markerVisibility !== 'hidden' &&
             !point.isCluster) {
@@ -26167,11 +26260,11 @@ class Pointer {
      * @param {Array<Highcharts.Point>} points
      * Currently hovered points
      */
-    applyInactiveState(points) {
-        let activeSeries = [], series;
+    applyInactiveState(points = []) {
+        const activeSeries = [];
         // Get all active series from the hovered points
-        (points || []).forEach(function (item) {
-            series = item.series;
+        points.forEach((item) => {
+            const series = item.series;
             // Include itself
             activeSeries.push(series);
             // Include parent series
@@ -26180,22 +26273,26 @@ class Pointer {
             }
             // Include all child series
             if (series.linkedSeries) {
-                activeSeries = activeSeries.concat(series.linkedSeries);
+                activeSeries.push.apply(activeSeries, series.linkedSeries);
             }
             // Include navigator series
             if (series.navigatorSeries) {
                 activeSeries.push(series.navigatorSeries);
             }
+            // Include boosed series when they share markerGroup
+            if (series.boosted && series.markerGroup) {
+                activeSeries.push.apply(activeSeries, this.chart.series.filter((otherSeries) => otherSeries.markerGroup === series.markerGroup));
+            }
         });
         // Now loop over all series, filtering out active series
-        this.chart.series.forEach(function (inactiveSeries) {
-            if (activeSeries.indexOf(inactiveSeries) === -1) {
+        this.chart.series.forEach((series) => {
+            if (activeSeries.indexOf(series) === -1) {
                 // Inactive series
-                inactiveSeries.setState('inactive', true);
+                series.setState('inactive', true);
             }
-            else if (inactiveSeries.options.inactiveOtherPoints) {
+            else if (series.options.inactiveOtherPoints) {
                 // Active series, but other points should be inactivated
-                inactiveSeries.setAllPointsToState('inactive');
+                series.setAllPointsToState('inactive');
             }
         });
     }
@@ -26496,7 +26593,7 @@ class Pointer {
                 chartY: y + yAxis.pos
             };
         }
-        if (shapeArgs && shapeArgs.x && shapeArgs.y) {
+        if (shapeArgs?.x && shapeArgs.y) {
             // E.g. pies do not have axes
             return {
                 chartX: shapeArgs.x,
@@ -26618,7 +26715,7 @@ class Pointer {
             existingHoverPoint :
             this.findNearestKDPoint(searchSeries, shared, e);
         // Assign hover series
-        hoverSeries = hoverPoint && hoverPoint.series;
+        hoverSeries = hoverPoint?.series;
         // If we have a hoverPoint, assign hoverPoints.
         if (hoverPoint) {
             // When tooltip is shared, it displays more than one point
@@ -26890,8 +26987,7 @@ class Pointer {
             // If the tooltip has stickOnContact enabled, do nothing. This
             // applies regardless of any combinations of the `split` and
             // `useHTML` options.
-            !(tooltip &&
-                tooltip.shouldStickOnContact(pEvt))) {
+            !tooltip?.shouldStickOnContact(pEvt)) {
             if (this.inClass(pEvt.target, 'highcharts-no-tooltip')) {
                 this.reset(false, 0);
             }
@@ -26949,8 +27045,7 @@ class Pointer {
             !chart.isInsidePlot(pEvt.chartX - chart.plotLeft, pEvt.chartY - chart.plotTop, {
                 visiblePlotOnly: true
             }) &&
-            !(tooltip &&
-                tooltip.shouldStickOnContact(pEvt)) && (pEvt.target === chart.container.ownerDocument ||
+            !tooltip?.shouldStickOnContact(pEvt) && (pEvt.target === chart.container.ownerDocument ||
             !this.inClass(pEvt.target, 'highcharts-tracker'))) {
             this.reset();
         }
@@ -27182,7 +27277,7 @@ class Pointer {
     */
     /**
      * Reset the tracking by hiding the tooltip, the hover series state and the
-     * hover point
+     * hover point.
      *
      * @function Highcharts.Pointer#reset
      *
@@ -27191,9 +27286,10 @@ class Pointer {
      * possible.
      *
      * @param {number} [delay]
+     * The tooltip hide delay in ms.
      */
     reset(allowMove, delay) {
-        const pointer = this, chart = pointer.chart, hoverSeries = chart.hoverSeries, hoverPoint = chart.hoverPoint, hoverPoints = chart.hoverPoints, tooltip = chart.tooltip, tooltipPoints = tooltip && tooltip.shared ?
+        const pointer = this, chart = pointer.chart, hoverSeries = chart.hoverSeries, hoverPoint = chart.hoverPoint, hoverPoints = chart.hoverPoints, tooltip = chart.tooltip, tooltipPoints = tooltip?.shared ?
             hoverPoints :
             hoverPoint;
         // Check if the points have moved outside the plot area (#1003, #4736,
@@ -27273,20 +27369,19 @@ class Pointer {
      * @emits Highcharts.Point#event:mouseOver
      */
     runPointActions(e, p, force) {
-        const pointer = this, chart = pointer.chart, series = chart.series, tooltip = (chart.tooltip && chart.tooltip.options.enabled ?
+        const pointer = this, chart = pointer.chart, series = chart.series, tooltip = (chart.tooltip?.options.enabled ?
             chart.tooltip :
             void 0), shared = (tooltip ?
             tooltip.shared :
             false);
-        let hoverPoint = p || chart.hoverPoint, hoverSeries = hoverPoint && hoverPoint.series || chart.hoverSeries;
+        let hoverPoint = p || chart.hoverPoint, hoverSeries = hoverPoint?.series || chart.hoverSeries;
         const // `onMouseOver` or already hovering a series with directTouch
-        isDirectTouch = (!e || e.type !== 'touchmove') && (!!p || ((hoverSeries && hoverSeries.directTouch) &&
+        isDirectTouch = (!e || e.type !== 'touchmove') && (!!p || ((hoverSeries?.directTouch) &&
             pointer.isDirectTouch)), hoverData = this.getHoverData(hoverPoint, hoverSeries, series, isDirectTouch, shared, e);
         // Update variables from hoverData.
         hoverPoint = hoverData.hoverPoint;
         hoverSeries = hoverData.hoverSeries;
-        const points = hoverData.hoverPoints, followPointer = hoverSeries &&
-            hoverSeries.tooltipOptions.followPointer &&
+        const points = hoverData.hoverPoints, followPointer = hoverSeries?.tooltipOptions.followPointer &&
             !hoverSeries.tooltipOptions.split, useSharedTooltip = (shared &&
             hoverSeries &&
             !hoverSeries.noSharedTooltip);
@@ -27295,7 +27390,7 @@ class Pointer {
         if (hoverPoint &&
             (force ||
                 hoverPoint !== chart.hoverPoint ||
-                (tooltip && tooltip.isHidden))) {
+                tooltip?.isHidden)) {
             (chart.hoverPoints || []).forEach(function (p) {
                 if (points.indexOf(p) === -1) {
                     p.setState();
@@ -27365,12 +27460,12 @@ class Pointer {
         }
         // Issues related to crosshair #4927, #5269 #5066, #5658
         chart.axes.forEach(function drawAxisCrosshair(axis) {
-            const snap = Pointer_pick((axis.crosshair || {}).snap, true);
+            const snap = axis.crosshair?.snap ?? true;
             let point;
             if (snap) {
                 point = chart.hoverPoint; // #13002
                 if (!point || point.series[axis.coll] !== axis) {
-                    point = Pointer_find(points, (p) => p.series && p.series[axis.coll] === axis);
+                    point = Pointer_find(points, (p) => p.series?.[axis.coll] === axis);
                 }
             }
             // Axis has snapping crosshairs, and one of the hover points belongs
@@ -27485,8 +27580,7 @@ class Pointer {
             }
             hoverChart.pointer?.onContainerMouseLeave(e || relatedTargetObj);
         }
-        if (!hoverChart ||
-            !hoverChart.mouseIsDown) {
+        if (!hoverChart?.mouseIsDown) {
             Pointer.hoverChartIndex = chart.index;
         }
     }
@@ -27735,6 +27829,121 @@ Pointer.unbindDocumentMouseUp = [];
 */
 ''; // Keeps doclets above in JS file
 
+;// ./code/es-modules/Data/ColumnUtils.js
+/* *
+ *
+ *  (c) 2020-2024 Highsoft AS
+ *
+ *  License: www.highcharts.com/license
+ *
+ *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+ *
+ *  Authors:
+ *  - Dawid Dragula
+ *
+ * */
+/**
+ * Utility functions for columns that can be either arrays or typed arrays.
+ * @private
+ */
+var ColumnUtils;
+(function (ColumnUtils) {
+    /* *
+    *
+    *  Declarations
+    *
+    * */
+    /* *
+    *
+    * Functions
+    *
+    * */
+    /**
+     * Sets the length of the column array.
+     *
+     * @param {DataTable.Column} column
+     * Column to be modified.
+     *
+     * @param {number} length
+     * New length of the column.
+     *
+     * @param {boolean} asSubarray
+     * If column is a typed array, return a subarray instead of a new array. It
+     * is faster `O(1)`, but the entire buffer will be kept in memory until all
+     * views to it are destroyed. Default is `false`.
+     *
+     * @return {DataTable.Column}
+     * Modified column.
+     *
+     * @private
+     */
+    function setLength(column, length, asSubarray) {
+        if (Array.isArray(column)) {
+            column.length = length;
+            return column;
+        }
+        return column[asSubarray ? 'subarray' : 'slice'](0, length);
+    }
+    ColumnUtils.setLength = setLength;
+    /**
+     * Splices a column array.
+     *
+     * @param {DataTable.Column} column
+     * Column to be modified.
+     *
+     * @param {number} start
+     * Index at which to start changing the array.
+     *
+     * @param {number} deleteCount
+     * An integer indicating the number of old array elements to remove.
+     *
+     * @param {boolean} removedAsSubarray
+     * If column is a typed array, return a subarray instead of a new array. It
+     * is faster `O(1)`, but the entire buffer will be kept in memory until all
+     * views to it are destroyed. Default is `true`.
+     *
+     * @param {Array<number>|TypedArray} items
+     * The elements to add to the array, beginning at the start index. If you
+     * don't specify any elements, `splice()` will only remove elements from the
+     * array.
+     *
+     * @return {SpliceResult}
+     * Object containing removed elements and the modified column.
+     *
+     * @private
+     */
+    function splice(column, start, deleteCount, removedAsSubarray, items = []) {
+        if (Array.isArray(column)) {
+            if (!Array.isArray(items)) {
+                items = Array.from(items);
+            }
+            return {
+                removed: column.splice(start, deleteCount, ...items),
+                array: column
+            };
+        }
+        const Constructor = Object.getPrototypeOf(column)
+            .constructor;
+        const removed = column[removedAsSubarray ? 'subarray' : 'slice'](start, start + deleteCount);
+        const newLength = column.length - deleteCount + items.length;
+        const result = new Constructor(newLength);
+        result.set(column.subarray(0, start), 0);
+        result.set(items, start);
+        result.set(column.subarray(start + deleteCount), start + items.length);
+        return {
+            removed: removed,
+            array: result
+        };
+    }
+    ColumnUtils.splice = splice;
+})(ColumnUtils || (ColumnUtils = {}));
+/* *
+ *
+ *  Default Export
+ *
+ * */
+/* harmony default export */ const Data_ColumnUtils = (ColumnUtils);
+
 ;// ./code/es-modules/Data/DataTableCore.js
 /* *
  *
@@ -27752,7 +27961,9 @@ Pointer.unbindDocumentMouseUp = [];
  * */
 
 
-const { fireEvent: DataTableCore_fireEvent, isArray: DataTableCore_isArray, objectEach: DataTableCore_objectEach, uniqueKey: DataTableCore_uniqueKey } = Core_Utilities;
+const { setLength, splice } = Data_ColumnUtils;
+
+const { fireEvent: DataTableCore_fireEvent, objectEach: DataTableCore_objectEach, uniqueKey: DataTableCore_uniqueKey } = Core_Utilities;
 /* *
  *
  *  Class
@@ -27796,7 +28007,7 @@ class DataTableCore {
         this.autoId = !options.id;
         this.columns = {};
         /**
-         * ID of the table for indentification purposes.
+         * ID of the table for identification purposes.
          *
          * @name Highcharts.DataTable#id
          * @type {string}
@@ -27826,11 +28037,38 @@ class DataTableCore {
      */
     applyRowCount(rowCount) {
         this.rowCount = rowCount;
-        DataTableCore_objectEach(this.columns, (column) => {
-            if (DataTableCore_isArray(column)) { // Not on typed array
-                column.length = rowCount;
+        DataTableCore_objectEach(this.columns, (column, columnName) => {
+            if (column.length !== rowCount) {
+                this.columns[columnName] = setLength(column, rowCount);
             }
         });
+    }
+    /**
+     * Delete rows. Simplified version of the full
+     * `DataTable.deleteRows` method.
+     *
+     * @param {number} rowIndex
+     * The start row index
+     *
+     * @param {number} [rowCount=1]
+     * The number of rows to delete
+     *
+     * @return {void}
+     *
+     * @emits #afterDeleteRows
+     */
+    deleteRows(rowIndex, rowCount = 1) {
+        if (rowCount > 0 && rowIndex < this.rowCount) {
+            let length = 0;
+            DataTableCore_objectEach(this.columns, (column, columnName) => {
+                this.columns[columnName] =
+                    splice(column, rowIndex, rowCount).array;
+                length = column.length;
+            });
+            this.rowCount = length;
+        }
+        DataTableCore_fireEvent(this, 'afterDeleteRows', { rowIndex, rowCount });
+        this.versionTag = DataTableCore_uniqueKey();
     }
     /**
      * Fetches the given column by the canonical column name. Simplified version
@@ -27890,7 +28128,7 @@ class DataTableCore {
      * @param {Highcharts.DataTableColumn} [column]
      * Values to set in the column.
      *
-     * @param {number} [rowIndex=0]
+     * @param {number} [rowIndex]
      * Index of the first row to change. (Default: 0)
      *
      * @param {Record<string, (boolean|number|string|null|undefined)>} [eventDetail]
@@ -27903,15 +28141,16 @@ class DataTableCore {
         this.setColumns({ [columnName]: column }, rowIndex, eventDetail);
     }
     /**
-     * * Sets cell values for multiple columns. Will insert new columns, if not
-     * found. Simplified version of the full `DataTable.setColumns`, limited to
-     * full replacement of the columns (undefined `rowIndex`).
+     * Sets cell values for multiple columns. Will insert new columns, if not
+     * found. Simplified version of the full `DataTableCore.setColumns`, limited
+     * to full replacement of the columns (undefined `rowIndex`).
      *
      * @param {Highcharts.DataTableColumnCollection} columns
      * Columns as a collection, where the keys are the column names.
      *
      * @param {number} [rowIndex]
-     * Index of the first row to change. Keep undefined to reset.
+     * Index of the first row to change. Ignored in the `DataTableCore`, as it
+     * always replaces the full column.
      *
      * @param {Record<string, (boolean|number|string|null|undefined)>} [eventDetail]
      * Custom information for pending events.
@@ -27940,7 +28179,7 @@ class DataTableCore {
      * Cell values to set.
      *
      * @param {number} [rowIndex]
-     * Index of the row to set. Leave `undefind` to add as a new row.
+     * Index of the row to set. Leave `undefined` to add as a new row.
      *
      * @param {boolean} [insert]
      * Whether to insert the row at the given index, or to overwrite the row.
@@ -27953,11 +28192,11 @@ class DataTableCore {
     setRow(row, rowIndex = this.rowCount, insert, eventDetail) {
         const { columns } = this, indexRowCount = insert ? this.rowCount + 1 : rowIndex + 1;
         DataTableCore_objectEach(row, (cellValue, columnName) => {
-            const column = columns[columnName] ||
+            let column = columns[columnName] ||
                 eventDetail?.addColumns !== false && new Array(indexRowCount);
             if (column) {
                 if (insert) {
-                    column.splice(rowIndex, 0, cellValue);
+                    column = splice(column, rowIndex, 0, true, [cellValue]).array;
                 }
                 else {
                     column[rowIndex] = cellValue;
@@ -27986,8 +28225,11 @@ class DataTableCore {
  *
  * */
 /**
+ * A typed array.
+ * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} Highcharts.TypedArray
+ * //**
  * A column of values in a data table.
- * @typedef {Array<boolean|null|number|string|undefined>} Highcharts.DataTableColumn
+ * @typedef {Array<boolean|null|number|string|undefined>|Highcharts.TypedArray} Highcharts.DataTableColumn
  */ /**
 * A collection of data table columns defined by a object where the key is the
 * column name and the value is an array of the column values.
@@ -30717,6 +30959,8 @@ const { svg: Series_svg, win: Series_win } = Core_Globals;
 const { seriesTypes } = Series_SeriesRegistry;
 
 
+const { format: Series_format } = Core_Templating;
+
 const { arrayMax: Series_arrayMax, arrayMin: Series_arrayMin, clamp: Series_clamp, correctFloat: Series_correctFloat, crisp: Series_crisp, defined: Series_defined, destroyObjectProperties: Series_destroyObjectProperties, diffObjects: Series_diffObjects, erase: Series_erase, error: Series_error, extend: Series_extend, find: Series_find, fireEvent: Series_fireEvent, getClosestDistance: Series_getClosestDistance, getNestedProperty: Series_getNestedProperty, insertItem: Series_insertItem, isArray: Series_isArray, isNumber: Series_isNumber, isString: Series_isString, merge: Series_merge, objectEach: Series_objectEach, pick: Series_pick, removeEvent: Series_removeEvent, syncTimeout: Series_syncTimeout } = Core_Utilities;
 /* *
  *
@@ -30868,10 +31112,8 @@ class Series {
         });
         Series_registerEventOptions(this, options);
         const events = options.events;
-        if ((events && events.click) ||
-            (options.point &&
-                options.point.events &&
-                options.point.events.click) ||
+        if (events?.click ||
+            options.point?.events?.click ||
             options.allowPointSelect) {
             chart.runTrackerClick = true;
         }
@@ -30887,13 +31129,13 @@ class Series {
         if (chartSeries.length) {
             lastSeries = chartSeries[chartSeries.length - 1];
         }
-        series._i = Series_pick(lastSeries && lastSeries._i, -1) + 1;
+        series._i = Series_pick(lastSeries?._i, -1) + 1;
         series.opacity = series.options.opacity;
         // Insert the series and re-order all series above the insertion
         // point.
         chart.orderItems('series', Series_insertItem(this, chartSeries));
         // Set options for series with sorting and set data later.
-        if (options.dataSorting && options.dataSorting.enabled) {
+        if (options.dataSorting?.enabled) {
             series.setDataSortingOptions();
         }
         else if (!series.points && !series.data) {
@@ -31075,6 +31317,8 @@ class Series {
         Series_fireEvent(this, 'setOptions', e);
         // These may be modified by the event
         const typeOptions = e.plotOptions[this.type], userPlotOptions = (userOptions.plotOptions || {}), userPlotOptionsSeries = userPlotOptions.series || {}, defaultPlotOptionsType = (Series_defaultOptions.plotOptions[this.type] || {}), userPlotOptionsType = userPlotOptions[this.type] || {};
+        // Merge in multiple data label options from the plot option. (#21928)
+        typeOptions.dataLabels = this.mergeArrays(defaultPlotOptionsType.dataLabels, typeOptions.dataLabels);
         // Use copy to prevent undetected changes (#9762)
         /**
          * Contains series options by the user without defaults.
@@ -31087,7 +31331,7 @@ class Series {
         // plotOptions.series
         userPlotOptionsType, seriesUserOptions);
         // The tooltip options are merged between global and series specific
-        // options. Importance order asscendingly:
+        // options. Importance order ascendingly:
         // globals: (1)tooltip, (2)plotOptions.series,
         // (3)plotOptions[this.type]
         // init userOptions with possible later updates: 4-6 like 1-3 and
@@ -31149,7 +31393,8 @@ class Series {
      */
     getName() {
         // #4119
-        return Series_pick(this.options.name, 'Series ' + (this.index + 1));
+        return this.options.name ??
+            Series_format(this.chart.options.lang.seriesName, this, this.chart);
     }
     /**
      * @private
@@ -31251,7 +31496,7 @@ class Series {
      * Returns the index of a matching point, or undefined if no match is found.
      */
     findPointIndex(optionsObject, fromIndex) {
-        const id = optionsObject.id, x = optionsObject.x, oldData = this.points, dataSorting = this.options.dataSorting;
+        const { id, x } = optionsObject, oldData = this.points, dataSorting = this.options.dataSorting, cropStart = this.cropStart || 0;
         let matchingPoint, matchedById, pointIndex;
         if (id) {
             const item = this.chart.get(id);
@@ -31264,7 +31509,7 @@ class Series {
             this.options.relativeXValue) {
             let matcher = (oldPoint) => !oldPoint.touched &&
                 oldPoint.index === optionsObject.index;
-            if (dataSorting && dataSorting.matchByName) {
+            if (dataSorting?.matchByName) {
                 matcher = (oldPoint) => !oldPoint.touched &&
                     oldPoint.name === optionsObject.name;
             }
@@ -31279,7 +31524,7 @@ class Series {
             }
         }
         if (matchingPoint) {
-            pointIndex = matchingPoint && matchingPoint.index;
+            pointIndex = matchingPoint?.index;
             if (typeof pointIndex !== 'undefined') {
                 matchedById = true;
             }
@@ -31292,12 +31537,12 @@ class Series {
         if (pointIndex !== -1 &&
             typeof pointIndex !== 'undefined' &&
             this.cropped) {
-            pointIndex = (pointIndex >= this.cropStart) ?
-                pointIndex - this.cropStart : pointIndex;
+            pointIndex = pointIndex >= cropStart ?
+                pointIndex - cropStart : pointIndex;
         }
         if (!matchedById &&
             Series_isNumber(pointIndex) &&
-            oldData[pointIndex] && oldData[pointIndex].touched) {
+            oldData[pointIndex]?.touched) {
             pointIndex = void 0;
         }
         return pointIndex;
@@ -31313,34 +31558,31 @@ class Series {
      * @function Highcharts.Series#updateData
      */
     updateData(data, animation) {
-        const options = this.options, dataSorting = options.dataSorting, oldData = this.points, pointsToAdd = [], requireSorting = this.requireSorting, equalLength = data.length === oldData.length;
+        const { options, requireSorting } = this, dataSorting = options.dataSorting, oldData = this.points, pointsToAdd = [], equalLength = data.length === oldData.length;
         let hasUpdatedByKey, i, point, lastIndex, succeeded = true;
         this.xIncrement = null;
         // Iterate the new data
-        data.forEach(function (pointOptions, i) {
+        data.forEach((pointOptions, i) => {
             const optionsObject = (Series_defined(pointOptions) &&
-                this.pointClass.prototype.optionsToObject.call({ series: this }, pointOptions)) || {};
+                this.pointClass.prototype.optionsToObject.call({ series: this }, pointOptions)) || {}, { id, x } = optionsObject;
             let pointIndex;
-            // Get the x of the new data point
-            const x = optionsObject.x, id = optionsObject.id;
             if (id || Series_isNumber(x)) {
                 pointIndex = this.findPointIndex(optionsObject, lastIndex);
-                // Matching X not found
-                // or used already due to ununique x values (#8995),
-                // add point (but later)
+                // Matching X not found or used already due to non-unique x
+                // values (#8995), add point (but later)
                 if (pointIndex === -1 ||
                     typeof pointIndex === 'undefined') {
                     pointsToAdd.push(pointOptions);
                     // Matching X found, update
                 }
                 else if (oldData[pointIndex] &&
-                    pointOptions !== options.data[pointIndex]) {
-                    oldData[pointIndex].update(pointOptions, false, null, false);
+                    pointOptions !== options.data?.[pointIndex]) {
+                    oldData[pointIndex].update(pointOptions, false, void 0, false);
                     // Mark it touched, below we will remove all points that
                     // are not touched.
                     oldData[pointIndex].touched = true;
                     // Speed optimize by only searching after last known
-                    // index. Performs ~20% bettor on large data sets.
+                    // index. Performs ~20% better on large data sets.
                     if (requireSorting) {
                         lastIndex = pointIndex + 1;
                     }
@@ -31354,7 +31596,7 @@ class Series {
                 // non-matches.
                 if (!equalLength ||
                     i !== pointIndex ||
-                    (dataSorting && dataSorting.enabled) ||
+                    dataSorting?.enabled ||
                     this.hasDerivedData) {
                     hasUpdatedByKey = true;
                 }
@@ -31369,19 +31611,19 @@ class Series {
             i = oldData.length;
             while (i--) {
                 point = oldData[i];
-                if (point && !point.touched && point.remove) {
-                    point.remove(false, animation);
+                if (point && !point.touched) {
+                    point.remove?.(false, animation);
                 }
             }
             // If we did not find keys (ids or x-values), and the length is the
             // same, update one-to-one
         }
-        else if (equalLength && (!dataSorting || !dataSorting.enabled)) {
-            data.forEach(function (point, i) {
+        else if (equalLength && !dataSorting?.enabled) {
+            data.forEach((point, i) => {
                 // .update doesn't exist on a linked, hidden series (#3709)
                 // (#10187)
                 if (point !== oldData[i].y && !oldData[i].destroyed) {
-                    oldData[i].update(point, false, null, false);
+                    oldData[i].update(point, false, void 0, false);
                 }
             });
             // Don't add new points since those configs are used above
@@ -31391,7 +31633,7 @@ class Series {
         else {
             succeeded = false;
         }
-        oldData.forEach(function (point) {
+        oldData.forEach((point) => {
             if (point) {
                 point.touched = false;
             }
@@ -31400,8 +31642,8 @@ class Series {
             return false;
         }
         // Add new points
-        pointsToAdd.forEach(function (point) {
-            this.addPoint(point, false, null, null, false);
+        pointsToAdd.forEach((point) => {
+            this.addPoint(point, false, void 0, void 0, false);
         }, this);
         const xData = this.getColumn('x');
         if (this.xIncrement === null &&
@@ -31462,7 +31704,7 @@ class Series {
      *        `false` to prevent.
      */
     setData(data, redraw = true, animation, updatePoints) {
-        const series = this, oldData = series.points, oldDataLength = (oldData && oldData.length) || 0, options = series.options, chart = series.chart, dataSorting = options.dataSorting, xAxis = series.xAxis, turboThreshold = options.turboThreshold, table = this.dataTable, dataColumnKeys = this.dataColumnKeys(), pointValKey = series.pointValKey || 'y', pointArrayMap = series.pointArrayMap || [], valueCount = pointArrayMap.length, keys = options.keys;
+        const series = this, oldData = series.points, oldDataLength = oldData?.length || 0, options = series.options, chart = series.chart, dataSorting = options.dataSorting, xAxis = series.xAxis, turboThreshold = options.turboThreshold, table = this.dataTable, dataColumnKeys = this.dataColumnKeys(), pointValKey = series.pointValKey || 'y', pointArrayMap = series.pointArrayMap || [], valueCount = pointArrayMap.length, keys = options.keys;
         let i, updatedData, indexOfX = 0, indexOfY = 1, copiedData;
         if (!chart.options.chart.allowMutatingData) { // #4259
             // Remove old reference
@@ -31476,7 +31718,7 @@ class Series {
         }
         data = copiedData || data || [];
         const dataLength = data.length;
-        if (dataSorting && dataSorting.enabled) {
+        if (dataSorting?.enabled) {
             data = this.sortData(data);
         }
         // First try to run Point.update which is cheaper, allows animation, and
@@ -31652,8 +31894,7 @@ class Series {
         if (series.linkedSeries) {
             series.linkedSeries.forEach(function (linkedSeries) {
                 const options = linkedSeries.options, seriesData = options.data;
-                if ((!options.dataSorting ||
-                    !options.dataSorting.enabled) &&
+                if (!options.dataSorting?.enabled &&
                     seriesData) {
                     seriesData.forEach(function (pointOptions, i) {
                         seriesData[i] = getPointOptionsObject(linkedSeries, pointOptions);
@@ -31808,8 +32049,7 @@ class Series {
      * @function Highcharts.Series#generatePoints
      */
     generatePoints() {
-        const series = this, options = series.options, dataOptions = series.processedData || options.data, table = series.dataTable.modified, xData = series.getColumn('x', true), PointClass = series.pointClass, processedDataLength = table.rowCount, cropStart = series.cropStart || 0, hasGroupedData = series.hasGroupedData, keys = options.keys, points = [], groupCropStartIndex = (options.dataGrouping &&
-            options.dataGrouping.groupAll ?
+        const series = this, options = series.options, dataOptions = series.processedData || options.data, table = series.dataTable.modified, xData = series.getColumn('x', true), PointClass = series.pointClass, processedDataLength = table.rowCount, cropStart = series.cropStart || 0, hasGroupedData = series.hasGroupedData, keys = options.keys, points = [], groupCropStartIndex = (options.dataGrouping?.groupAll ?
             cropStart :
             0), categories = series.xAxis?.categories, pointArrayMap = series.pointArrayMap || ['y'], 
         // Create a configuration object out of a data row
@@ -32507,13 +32747,13 @@ class Series {
     markerAttribs(point, state) {
         const seriesOptions = this.options, seriesMarkerOptions = seriesOptions.marker, pointMarkerOptions = point.marker || {}, symbol = (pointMarkerOptions.symbol ||
             seriesMarkerOptions.symbol), attribs = {};
-        let seriesStateOptions, pointStateOptions, radius = Series_pick(pointMarkerOptions.radius, seriesMarkerOptions && seriesMarkerOptions.radius);
+        let seriesStateOptions, pointStateOptions, radius = Series_pick(pointMarkerOptions.radius, seriesMarkerOptions?.radius);
         // Handle hover and select states
         if (state) {
             seriesStateOptions = seriesMarkerOptions.states[state];
             pointStateOptions = pointMarkerOptions.states &&
                 pointMarkerOptions.states[state];
-            radius = Series_pick(pointStateOptions && pointStateOptions.radius, seriesStateOptions && seriesStateOptions.radius, radius && radius + (seriesStateOptions && seriesStateOptions.radiusPlus ||
+            radius = Series_pick(pointStateOptions?.radius, seriesStateOptions?.radius, radius && radius + (seriesStateOptions?.radiusPlus ||
                 0));
         }
         point.hasImage = symbol && symbol.indexOf('url') === 0;
@@ -32558,7 +32798,7 @@ class Series {
      * The presentational attributes to be set on the point.
      */
     pointAttribs(point, state) {
-        const seriesMarkerOptions = this.options.marker, pointOptions = point && point.options, pointMarkerOptions = ((pointOptions && pointOptions.marker) || {}), pointColorOption = pointOptions && pointOptions.color, pointColor = point && point.color, zoneColor = point && point.zone && point.zone.color;
+        const seriesMarkerOptions = this.options.marker, pointOptions = point?.options, pointMarkerOptions = pointOptions?.marker || {}, pointColorOption = pointOptions?.color, pointColor = point?.color, zoneColor = point?.zone?.color;
         let seriesStateOptions, pointStateOptions, color = this.color, fill, stroke, strokeWidth = Series_pick(pointMarkerOptions.lineWidth, seriesMarkerOptions.lineWidth), opacity = 1;
         color = (pointColorOption ||
             zoneColor ||
@@ -32602,7 +32842,7 @@ class Series {
      */
     destroy(keepEventsForUpdate) {
         const series = this, chart = series.chart, issue134 = /AppleWebKit\/533/.test(Series_win.navigator.userAgent), data = series.data || [];
-        let destroy, i, point, axis;
+        let destroy, i, axis;
         // Add event hook
         Series_fireEvent(series, 'destroy', { keepEventsForUpdate });
         // Remove events
@@ -32610,7 +32850,7 @@ class Series {
         // Erase from axes
         (series.axisTypes || []).forEach(function (AXIS) {
             axis = series[AXIS];
-            if (axis && axis.series) {
+            if (axis?.series) {
                 Series_erase(axis.series, series);
                 axis.isDirty = axis.forceRedraw = true;
             }
@@ -32622,10 +32862,7 @@ class Series {
         // Destroy all points with their elements
         i = data.length;
         while (i--) {
-            point = data[i];
-            if (point && point.destroy) {
-                point.destroy();
-            }
+            data[i]?.destroy?.();
         }
         for (const zone of series.zones) {
             // Destroy SVGElement's but preserve primitive props (#20426)
@@ -33284,7 +33521,7 @@ class Series {
      * @emits Highcharts.Series#event:addPoint
      */
     addPoint(options, redraw, shift, animation, withEvent) {
-        const series = this, seriesOptions = series.options, { chart, data, dataTable: table, xAxis } = series, names = xAxis && xAxis.hasNames && xAxis.names, dataOptions = seriesOptions.data, xData = series.getColumn('x');
+        const series = this, seriesOptions = series.options, { chart, data, dataTable: table, xAxis } = series, names = xAxis?.hasNames && xAxis.names, dataOptions = seriesOptions.data, xData = series.getColumn('x');
         let isInTheMiddle, i;
         // Optional redraw, defaults to true
         redraw = Series_pick(redraw, true);
@@ -33327,13 +33564,11 @@ class Series {
             else {
                 [
                     data,
-                    dataOptions,
-                    ...Object.values(table.getColumns())
+                    dataOptions
                 ].filter(Series_defined).forEach((coll) => {
                     coll.shift();
                 });
-                table.rowCount -= 1;
-                Series_fireEvent(table, 'afterDeleteRows');
+                table.deleteRows(0);
             }
         }
         // Fire event
@@ -33381,15 +33616,11 @@ class Series {
                 // #4935
                 points?.length === data.length ? points : void 0,
                 data,
-                series.options.data,
-                ...Object.values(table.getColumns())
+                series.options.data
             ].filter(Series_defined).forEach((coll) => {
                 coll.splice(i, 1);
             });
-            // Shorthand row deletion in order to avoid including the whole
-            // `deleteRows` function in the DataTableCore module.
-            table.rowCount -= 1;
-            Series_fireEvent(table, 'afterDeleteRows');
+            table.deleteRows(i);
             point?.destroy();
             // Redraw
             series.isDirty = true;
@@ -33644,7 +33875,7 @@ class Series {
                 }
             }
             for (const point of this.points) {
-                if (point && point.series) {
+                if (point?.series) {
                     point.resolveColor();
                     // Destroy elements in order to recreate based on updated
                     // series options.
@@ -34666,7 +34897,7 @@ class Legend {
      */
     positionItem(item) {
         const legend = this, { group, x = 0, y = 0 } = item.legendItem || {}, options = legend.options, symbolPadding = options.symbolPadding, ltr = !options.rtl, checkbox = item.checkbox;
-        if (group && group.element) {
+        if (group?.element) {
             const attribs = {
                 translateX: ltr ?
                     x :
@@ -34741,7 +34972,7 @@ class Legend {
      * @function Highcharts.Legend#positionCheckboxes
      */
     positionCheckboxes() {
-        const alignAttr = this.group && this.group.alignAttr, clipHeight = this.clipHeight || this.legendHeight, titleHeight = this.titleHeight;
+        const alignAttr = this.group?.alignAttr, clipHeight = this.clipHeight || this.legendHeight, titleHeight = this.titleHeight;
         let translateY;
         if (alignAttr) {
             translateY = alignAttr.translateY;
@@ -34907,7 +35138,7 @@ class Legend {
         legend.setText(item);
         // Calculate the positions for the next line
         const bBox = label.getBBox();
-        const fontMetricsH = (legend.fontMetrics && legend.fontMetrics.h) || 0;
+        const fontMetricsH = legend.fontMetrics?.h || 0;
         item.itemWidth = item.checkboxOffset =
             options.itemWidth ||
                 legendItem.labelWidth ||
@@ -34978,13 +35209,13 @@ class Legend {
     getAllItems() {
         let allItems = [];
         this.chart.series.forEach(function (series) {
-            const seriesOptions = series && series.options;
+            const seriesOptions = series?.options;
             // Handle showInLegend. If the series is linked to another series,
             // defaults to false.
             if (series && Legend_pick(seriesOptions.showInLegend, !Legend_defined(seriesOptions.linkedTo) ? void 0 : false, true)) {
                 // Use points or series for the legend item depending on
                 // legendType
-                allItems = allItems.concat((series.legendItem || {}).labels ||
+                allItems = allItems.concat(series.legendItem?.labels ||
                     (seriesOptions.legendType === 'point' ?
                         series.data :
                         series));
@@ -35138,8 +35369,8 @@ class Legend {
         }
         legend.renderTitle();
         // Sort by legendIndex
-        Legend_stableSort(allItems, (a, b) => ((a.options && a.options.legendIndex) || 0) -
-            ((b.options && b.options.legendIndex) || 0));
+        Legend_stableSort(allItems, (a, b) => (a.options?.legendIndex || 0) -
+            (b.options?.legendIndex || 0));
         // Reversed legend
         if (options.reversed) {
             allItems.reverse();
@@ -35288,7 +35519,7 @@ class Legend {
             }
             return legend[key];
         };
-        let clipHeight, lastY, legendItem, spaceHeight = (chart.spacingBox.height +
+        let clipHeight, lastY, legendItem, lastLegendItem, spaceHeight = (chart.spacingBox.height +
             (alignTop ? -optionsY : optionsY) - padding), nav = this.nav, clipRect = this.clipRect;
         // Adjust the height
         if (options.layout === 'horizontal' &&
@@ -35322,8 +35553,8 @@ class Legend {
                 }
                 // Keep track of which page each item is on
                 legendItem.pageIx = len - 1;
-                if (lastY) {
-                    (allItems[i - 1].legendItem || {}).pageIx = len - 1;
+                if (lastY && lastLegendItem) {
+                    lastLegendItem.pageIx = len - 1;
                 }
                 // Add the last page if needed (#2617, #13683)
                 if (
@@ -35338,6 +35569,7 @@ class Legend {
                 if (y !== lastY) {
                     lastY = y;
                 }
+                lastLegendItem = legendItem;
             });
             // Only apply clipping if needed. Clipping causes blurred legend in
             // PDF export (#1787)
@@ -36017,7 +36249,7 @@ class Chart {
              */
             this.time = new Core_Time(Chart_extend(options.time || {}, {
                 locale: this.locale
-            }));
+            }), options.lang);
             options.time = this.time.options;
             /**
              * Callback function to override the default function that formats
@@ -36752,7 +36984,7 @@ class Chart {
     temporaryDisplay(revert) {
         let node = this.renderTo, tempStyle;
         if (!revert) {
-            while (node && node.style) {
+            while (node?.style) {
                 // When rendering to a detached node, it needs to be temporarily
                 // attached in order to read styling and bounding boxes (#5783,
                 // #7024).
@@ -36789,7 +37021,7 @@ class Chart {
             }
         }
         else {
-            while (node && node.style) {
+            while (node?.style) {
                 if (node.hcOrigStyle) {
                     Chart_css(node, node.hcOrigStyle);
                     delete node.hcOrigStyle;
@@ -36910,7 +37142,7 @@ class Chart {
          * @name Highcharts.Chart#renderer
          * @type {Highcharts.SVGRenderer}
          */
-        chart.renderer = new Renderer(container, chartWidth, chartHeight, void 0, optionsChart.forExport, options.exporting && options.exporting.allowHTML, chart.styledMode);
+        chart.renderer = new Renderer(container, chartWidth, chartHeight, void 0, optionsChart.forExport, options.exporting?.allowHTML, chart.styledMode);
         // Set the initial animation from the options
         Chart_setAnimation(void 0, chart);
         chart.setClassName(optionsChart.className);
@@ -36947,7 +37179,7 @@ class Chart {
             this.marginBottom = Math.max(this.marginBottom, titleOffset[2] + spacing[2]);
         }
         // Adjust for legend
-        if (this.legend && this.legend.display) {
+        if (this.legend?.display) {
             this.legend.adjustMargins(margin, spacing);
         }
         Chart_fireEvent(this, 'getMargins');
@@ -36973,7 +37205,7 @@ class Chart {
         if (chart.hasCartesianSeries) {
             getOffset(chart.axes);
         }
-        else if (colorAxis && colorAxis.length) {
+        else if (colorAxis?.length) {
             getOffset(colorAxis);
         }
         // Add the axis offsets
@@ -37183,14 +37415,14 @@ class Chart {
          * @name Highcharts.Chart#plotWidth
          * @type {number}
          */
-        chart.plotWidth = plotWidth = Math.max(0, Math.round(chartWidth - plotLeft - chart.marginRight));
+        chart.plotWidth = plotWidth = Math.max(0, Math.round(chartWidth - plotLeft - (chart.marginRight ?? 0)));
         /**
          * The current height of the plot area in pixels.
          *
          * @name Highcharts.Chart#plotHeight
          * @type {number}
          */
-        chart.plotHeight = plotHeight = Math.max(0, Math.round(chartHeight - plotTop - chart.marginBottom));
+        chart.plotHeight = plotHeight = Math.max(0, Math.round(chartHeight - plotTop - (chart.marginBottom ?? 0)));
         chart.plotSizeX = inverted ? plotHeight : plotWidth;
         chart.plotSizeY = inverted ? plotWidth : plotHeight;
         // Set boxes used for alignment
@@ -37232,7 +37464,7 @@ class Chart {
      */
     resetMargins() {
         Chart_fireEvent(this, 'resetMargins');
-        const chart = this, chartOptions = chart.options.chart, plotBorderWidth = chartOptions.plotBorderWidth || 0, halfWidth = plotBorderWidth / 2;
+        const chart = this, chartOptions = chart.options.chart, plotBorderWidth = chartOptions.plotBorderWidth || 0, halfWidth = Math.round(plotBorderWidth) / 2;
         // Create margin and spacing array
         ['margin', 'spacing'].forEach(function splashArrays(target) {
             const value = chartOptions[target], values = Chart_isObject(value) ? value : [value, value, value, value];
@@ -37398,7 +37630,7 @@ class Chart {
                     (klass && klass.prototype[key]);
             // Requires it
             // 4. Check if any the chart's series require it
-            i = seriesOptions && seriesOptions.length;
+            i = seriesOptions?.length;
             while (!value && i--) {
                 klass = Chart_seriesTypes[seriesOptions[i].type];
                 if (klass && klass.prototype[key]) {
@@ -37558,7 +37790,7 @@ class Chart {
         if (chart.hasCartesianSeries) {
             renderAxes(axes);
         }
-        else if (colorAxis && colorAxis.length) {
+        else if (colorAxis?.length) {
             renderAxes(colorAxis);
         }
         // The series
@@ -37639,7 +37871,7 @@ class Chart {
      * @emits Highcharts.Chart#event:destroy
      */
     destroy() {
-        const chart = this, axes = chart.axes, series = chart.series, container = chart.container, parentNode = container && container.parentNode;
+        const chart = this, axes = chart.axes, series = chart.series, container = chart.container, parentNode = container?.parentNode;
         let i;
         // Fire the chart.destroy event
         Chart_fireEvent(chart, 'destroy');
@@ -37661,9 +37893,7 @@ class Chart {
             axes[i] = axes[i].destroy();
         }
         // Destroy scroller & scroller series before destroying base series
-        if (this.scroller && this.scroller.destroy) {
-            this.scroller.destroy();
-        }
+        this.scroller?.destroy?.();
         // Destroy each series
         i = series.length;
         while (i--) {
@@ -37675,11 +37905,8 @@ class Chart {
             'plotBGImage', 'plotBorder', 'seriesGroup', 'clipRect', 'credits',
             'pointer', 'rangeSelector', 'legend', 'resetZoomButton', 'tooltip',
             'renderer'
-        ].forEach(function (name) {
-            const prop = chart[name];
-            if (prop && prop.destroy) {
-                chart[name] = prop.destroy();
-            }
+        ].forEach((name) => {
+            chart[name] = chart[name]?.destroy?.();
         });
         // Remove container and all SVG, check container as it can break in IE
         // when destroyed before finished loading
@@ -37775,7 +38002,7 @@ class Chart {
             // Make chart behave as an image with the title as alt text
             this.renderer.boxWrapper.attr({
                 role: 'img',
-                'aria-label': ((title && title.element.textContent) || ''
+                'aria-label': (title?.element.textContent || ''
                 // #17753, < is not allowed in SVG attributes
                 ).replace(/</g, '&lt;')
             });
@@ -38252,7 +38479,7 @@ class Chart {
             }, this);
         }
         // Update size. Redraw is forced.
-        const newWidth = optionsChart && optionsChart.width;
+        const newWidth = optionsChart?.width;
         const newHeight = optionsChart && (Chart_isString(optionsChart.height) ?
             Chart_relativeLength(optionsChart.height, newWidth || chart.chartWidth) :
             optionsChart.height);
@@ -39451,12 +39678,12 @@ function chartGetStacks() {
     const chart = this, inverted = chart.inverted;
     // Reset stacks for each axis
     chart.axes.forEach((axis) => {
-        if (axis.stacking && axis.stacking.stacks && axis.hasVisibleSeries) {
+        if (axis.stacking?.stacks && axis.hasVisibleSeries) {
             axis.stacking.oldStacks = axis.stacking.stacks;
         }
     });
     chart.series.forEach((series) => {
-        const xAxisOptions = series.xAxis && series.xAxis.options || {};
+        const xAxisOptions = series.xAxis?.options || {};
         if (series.options.stacking && series.reserveSpace()) {
             series.stackKey = [
                 series.type,
@@ -39982,7 +40209,7 @@ class LineSeries extends Series_Series {
             const plotX = point.plotX, plotY = point.plotY, lastPoint = points[i - 1], isNull = point.isNull || typeof plotY !== 'number';
             // The path to this point from the previous
             let pathToPoint;
-            if ((point.leftCliff || (lastPoint && lastPoint.rightCliff)) &&
+            if ((point.leftCliff || lastPoint?.rightCliff) &&
                 !connectCliffs) {
                 gap = true; // ... and continue
             }
@@ -42732,6 +42959,7 @@ var DataLabel;
             seriesProto.alignDataLabel = alignDataLabel;
             seriesProto.drawDataLabels = drawDataLabels;
             seriesProto.justifyDataLabel = justifyDataLabel;
+            seriesProto.mergeArrays = mergeArrays;
             seriesProto.setDataLabelStartPos = setDataLabelStartPos;
             seriesProto.hasDataLabels = hasDataLabels;
         }
@@ -42934,7 +43162,7 @@ var DataLabel;
                 while (j--) {
                     // The item can be undefined if a disabled data label is
                     // succeeded by an enabled one (#19457)
-                    if (!dataLabels[j] || !dataLabels[j].isActive) {
+                    if (!dataLabels[j]?.isActive) {
                         dataLabels[j]?.destroy();
                         dataLabels.splice(j, 1);
                     }
@@ -43142,7 +43370,7 @@ const { composed: ColumnDataLabel_composed } = Core_Globals;
 
 const { series: ColumnDataLabel_Series } = Series_SeriesRegistry;
 
-const { merge: ColumnDataLabel_merge, pick: ColumnDataLabel_pick, pushUnique: ColumnDataLabel_pushUnique } = Core_Utilities;
+const { merge: ColumnDataLabel_merge, pushUnique: ColumnDataLabel_pushUnique } = Core_Utilities;
 /* *
  *
  *  Composition
@@ -43160,19 +43388,20 @@ var ColumnDataLabel;
      * the column.
      * @private
      */
-    function alignDataLabel(point, dataLabel, options, alignTo, isNew) {
-        const inverted = this.chart.inverted, series = point.series, xLen = (series.xAxis ? series.xAxis.len : this.chart.plotSizeX) || 0, yLen = (series.yAxis ? series.yAxis.len : this.chart.plotSizeY) || 0, 
+    function alignDataLabel(point, dataLabel, dlOptions, alignTo, isNew) {
+        const { chart, options } = this, inverted = chart.inverted, xLen = this.xAxis?.len || chart.plotSizeX || 0, yLen = this.yAxis?.len || chart.plotSizeY || 0, 
         // Data label box for alignment
-        dlBox = point.dlBox || point.shapeArgs, below = ColumnDataLabel_pick(point.below, // Range series
-        point.plotY >
-            ColumnDataLabel_pick(this.translatedThreshold, yLen)), 
+        dlBox = point.dlBox || point.shapeArgs, below = point.below ?? // Range series
+            (point.plotY || 0) > (this.translatedThreshold ?? yLen), 
         // Draw it inside the box?
-        inside = ColumnDataLabel_pick(options.inside, !!this.options.stacking);
+        inside = dlOptions.inside ?? !!options.stacking;
         // Align to the column itself, or the top of it
         if (dlBox) { // Area range uses this method but not alignTo
             alignTo = ColumnDataLabel_merge(dlBox);
-            // Check for specific overflow and crop conditions (#13240)
-            if (!(options.overflow === 'allow' && options.crop === false)) {
+            // Check for specific overflow and crop conditions (#13240, #22617)
+            if (dlOptions.overflow !== 'allow' ||
+                dlOptions.crop !== false ||
+                options.clip !== false) {
                 if (alignTo.y < 0) {
                     alignTo.height += alignTo.y;
                     alignTo.y = 0;
@@ -43206,12 +43435,14 @@ var ColumnDataLabel;
         }
         // When alignment is undefined (typically columns and bars), display the
         // individual point below or above the point depending on the threshold
-        options.align = ColumnDataLabel_pick(options.align, !inverted || inside ? 'center' : below ? 'right' : 'left');
-        options.verticalAlign = ColumnDataLabel_pick(options.verticalAlign, inverted || inside ? 'middle' : below ? 'top' : 'bottom');
+        dlOptions.align ?? (dlOptions.align = !inverted || inside ?
+            'center' : below ? 'right' : 'left');
+        dlOptions.verticalAlign ?? (dlOptions.verticalAlign = inverted || inside ?
+            'middle' : below ? 'top' : 'bottom');
         // Call the parent method
-        ColumnDataLabel_Series.prototype.alignDataLabel.call(this, point, dataLabel, options, alignTo, isNew);
+        ColumnDataLabel_Series.prototype.alignDataLabel.call(this, point, dataLabel, dlOptions, alignTo, isNew);
         // If label was justified and we have contrast, set it:
-        if (options.inside && point.contrastColor) {
+        if (dlOptions.inside && point.contrastColor) {
             dataLabel.css({
                 color: point.contrastColor
             });
@@ -43893,7 +44124,7 @@ class PiePoint extends Series_Point {
     constructor(series, options, x) {
         super(series, options, x);
         this.half = 0;
-        this.name ?? (this.name = 'Slice');
+        this.name ?? (this.name = series.chart.options.lang.pieSliceName);
         // Add event listener for select
         const toggleSlice = (e) => {
             this.slice(e.type === 'select');
@@ -45509,8 +45740,7 @@ var PieDataLabel_ColumnDataLabel;
                         dataLabel.css({
                             width: (Math.max(dataLabel.getBBox().width -
                                 labelPosition.sideOverflow, 0)) + 'px',
-                            textOverflow: ((dataLabel.options?.style || {})
-                                .textOverflow ||
+                            textOverflow: (dataLabel.options?.style?.textOverflow ||
                                 'ellipsis')
                         });
                         dataLabel.shortened = true;
@@ -46423,12 +46653,12 @@ var Responsive;
         }
         // Merge matching rules
         const mergedOptions = Responsive_merge(...ruleIds
-            .map((ruleId) => Responsive_find((options || {}).rules || [], (rule) => (rule._id === ruleId)))
-            .map((rule) => (rule && rule.chartOptions)));
+            .map((ruleId) => Responsive_find(options?.rules || [], (rule) => (rule._id === ruleId)))
+            .map((rule) => rule?.chartOptions));
         mergedOptions.isResponsiveOptions = true;
         // Stringified key for the rules that currently apply.
         ruleIds = (ruleIds.toString() || void 0);
-        const currentRuleIds = (currentResponsive && currentResponsive.ruleIds);
+        const currentRuleIds = currentResponsive?.ruleIds;
         // Changes in what rules apply
         if (ruleIds !== currentRuleIds) {
             // Undo previous rules. Before we apply a new set of rules, we
@@ -47135,7 +47365,7 @@ const NavigatorDefaults = {
      * @sample {highstock} stock/navigator/margin/
      *         A margin of 2 draws the navigator closer to the X axis labels
      */
-    margin: 25,
+    margin: 22,
     /**
      * Whether the mask should be inside the range marking the zoomed
      * range, or outside. In Highcharts Stock 1.x it was always `false`.
@@ -47543,7 +47773,7 @@ const NavigatorDefaults = {
         },
         crosshair: false,
         title: {
-            text: null
+            text: void 0
         },
         tickLength: 0,
         tickWidth: 0
@@ -47781,8 +48011,8 @@ var ScrollbarAxis;
     ScrollbarAxis.compose = compose;
     /** @private */
     function getExtremes(axis) {
-        const axisMin = ScrollbarAxis_pick(axis.options && axis.options.min, axis.min);
-        const axisMax = ScrollbarAxis_pick(axis.options && axis.options.max, axis.max);
+        const axisMin = ScrollbarAxis_pick(axis.options?.min, axis.min);
+        const axisMax = ScrollbarAxis_pick(axis.options?.max, axis.max);
         return {
             axisMin,
             axisMax,
@@ -47811,9 +48041,7 @@ var ScrollbarAxis;
      */
     function onAxisAfterInit() {
         const axis = this;
-        if (axis.options &&
-            axis.options.scrollbar &&
-            axis.options.scrollbar.enabled) {
+        if (axis.options?.scrollbar?.enabled) {
             // Predefined options:
             axis.options.scrollbar.vertical = !axis.horiz;
             axis.options.startOnTick = axis.options.endOnTick = false;
@@ -48039,7 +48267,7 @@ const ScrollbarDefaults = {
     /**
      * The margin between the scrollbar and its axis when the scrollbar is
      * applied directly to an axis, or the navigator in case that is enabled.
-     * Defaults to 10 for axis, 0 for navigator.
+     * Defaults to 10 for axis, 3 for navigator.
      *
      * @type {number|undefined}
      */
@@ -49827,9 +50055,9 @@ class Navigator {
             navigator.xAxis.navigatorAxis.toFixedRange = (NavigatorAxisComposition.prototype.toFixedRange.bind(navigator.xAxis.navigatorAxis));
         }
         // Initialize the scrollbar
-        if (chart.options.scrollbar.enabled) {
+        if (chart.options.scrollbar?.enabled) {
             const options = Navigator_merge(chart.options.scrollbar, { vertical: chart.inverted });
-            if (!Navigator_isNumber(options.margin) && navigator.navigatorEnabled) {
+            if (!Navigator_isNumber(options.margin)) {
                 options.margin = chart.inverted ? -3 : 3;
             }
             chart.scrollbar = navigator.scrollbar = new Scrollbar_Scrollbar(chart.renderer, options, chart);
@@ -50258,10 +50486,10 @@ class Navigator {
                 marginName = navigator.opposite ?
                     'marginRight' : 'plotLeft';
             }
-            chart[marginName] =
-                (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
-                    navigator.height + navigator.scrollbarHeight :
-                    0) + navigator.navigatorOptions.margin;
+            chart[marginName] = (chart[marginName] || 0) + (navigator.navigatorEnabled || !chart.inverted ?
+                navigator.height +
+                    (this.scrollbar?.options.margin || 0) +
+                    navigator.scrollbarHeight : 0) + (navigator.navigatorOptions.margin || 0);
         }), Navigator_addEvent(Navigator, 'setRange', function (e) {
             this.chart.xAxis[0].setExtremes(e.min, e.max, e.redraw, e.animation, e.eventArguments);
         }));
@@ -50501,8 +50729,8 @@ class StandaloneNavigator {
             const removeSetExtremesEvent = StandaloneNavigator_addEvent(axis, 'setExtremes', (e) => {
                 if (e.trigger === 'pan' ||
                     e.trigger === 'zoom' ||
-                    e.trigger === 'mouseWheelZoom') {
-                    nav.setRange(e.min, e.max, true, e.trigger !== 'pan', { trigger: axis });
+                    e.trigger === 'mousewheel') {
+                    nav.setRange(e.min, e.max, true, e.trigger !== 'pan' && e.trigger !== 'mousewheel', { trigger: axis });
                 }
             });
             removeEventCallbacks.push(removeSetExtremesEvent);
@@ -50721,7 +50949,7 @@ class StandaloneNavigator {
 
 ;// ./code/es-modules/masters/modules/navigator.src.js
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/navigator
  * @requires highcharts
  *

@@ -2829,32 +2829,32 @@ var AxisDefaults;
          */
         startOnTick: true,
         title: {
-            /**
-             * The pixel distance between the axis labels and the title.
-             * Positive values are outside the axis line, negative are inside.
-             *
-             * @sample {highcharts} highcharts/xaxis/title-margin/
-             *         Y axis title margin of 60
-             *
-             * @type      {number}
-             * @default   40
-             * @apioption yAxis.title.margin
-             */
-            /**
-             * The actual text of the axis title. Horizontal texts can contain
-             * HTML, but rotated texts are painted using vector techniques and
-             * must be clean text. The Y axis title is disabled by setting the
-             * `text` option to `undefined`.
-             *
-             * @sample {highcharts} highcharts/xaxis/title-text/
-             *         Custom HTML
-             *
-             * @type    {string|null}
-             * @default {highcharts} Values
-             * @default {highstock} undefined
-             * @product highcharts highstock gantt
-             */
-            text: 'Values'
+        /**
+         * The pixel distance between the axis labels and the title.
+         * Positive values are outside the axis line, negative are inside.
+         *
+         * @sample {highcharts} highcharts/xaxis/title-margin/
+         *         Y axis title margin of 60
+         *
+         * @type      {number}
+         * @default   40
+         * @apioption yAxis.title.margin
+         */
+        /**
+         * The actual text of the axis title. Horizontal texts can contain
+         * HTML, but rotated texts are painted using vector techniques and
+         * must be clean text. The Y axis title is disabled by setting the
+         * `text` option to `undefined`. The default value is overriden by
+         * the `lang.yAxisTitle` language option.
+         *
+         * @sample {highcharts} highcharts/xaxis/title-text/
+         *         Custom HTML
+         *
+         * @type    {string|undefined}
+         * @default {highcharts} Values
+         * @default {highstock} undefined
+         * @product highcharts highstock gantt
+         */
         },
         /**
          * The top position of the Y axis. If it's a number, it is interpreted

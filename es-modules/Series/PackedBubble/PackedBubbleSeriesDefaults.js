@@ -155,7 +155,7 @@ const PackedBubbleSeriesDefaults = {
             return this.name || '';
         },
         /**
-         * @sample {highcharts} highcharts/series-packedbubble/packed-dashboard
+         * @sample {highcharts} highcharts/demo/packed-bubble-project-status/
          *         Dashboard with dataLabels on parentNodes
          *
          * @declare Highcharts.SeriesPackedBubbleDataLabelsTextPathOptionsObject
@@ -244,7 +244,7 @@ const PackedBubbleSeriesDefaults = {
          * In case of split series, this option allows user to drag and
          * drop points between series, for changing point related series.
          *
-         * @sample highcharts/series-packedbubble/packed-dashboard/
+         * @sample highcharts/demo/packed-bubble-project-status/
          *         Example of drag'n drop bubbles for bubble kanban
          */
         dragBetweenSeries: false,
@@ -320,7 +320,8 @@ const PackedBubbleSeriesDefaults = {
         maxSpeed: 5,
         gravitationalConstant: 0.01,
         friction: -0.981
-    }
+    },
+    stickyTracking: false
 };
 /* *
  *

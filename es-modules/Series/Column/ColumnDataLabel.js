@@ -14,7 +14,7 @@ const { composed } = H;
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
 const { series: Series } = SeriesRegistry;
 import U from '../../Core/Utilities.js';
-const { merge, pick, pushUnique } = U;
+const { merge, pushUnique } = U;
 /* *
  *
  *  Composition
@@ -32,19 +32,20 @@ var ColumnDataLabel;
      * the column.
      * @private
      */
-    function alignDataLabel(point, dataLabel, options, alignTo, isNew) {
-        const inverted = this.chart.inverted, series = point.series, xLen = (series.xAxis ? series.xAxis.len : this.chart.plotSizeX) || 0, yLen = (series.yAxis ? series.yAxis.len : this.chart.plotSizeY) || 0, 
+    function alignDataLabel(point, dataLabel, dlOptions, alignTo, isNew) {
+        const { chart, options } = this, inverted = chart.inverted, xLen = this.xAxis?.len || chart.plotSizeX || 0, yLen = this.yAxis?.len || chart.plotSizeY || 0, 
         // Data label box for alignment
-        dlBox = point.dlBox || point.shapeArgs, below = pick(point.below, // Range series
-        point.plotY >
-            pick(this.translatedThreshold, yLen)), 
+        dlBox = point.dlBox || point.shapeArgs, below = point.below ?? // Range series
+            (point.plotY || 0) > (this.translatedThreshold ?? yLen), 
         // Draw it inside the box?
-        inside = pick(options.inside, !!this.options.stacking);
+        inside = dlOptions.inside ?? !!options.stacking;
         // Align to the column itself, or the top of it
         if (dlBox) { // Area range uses this method but not alignTo
             alignTo = merge(dlBox);
-            // Check for specific overflow and crop conditions (#13240)
-            if (!(options.overflow === 'allow' && options.crop === false)) {
+            // Check for specific overflow and crop conditions (#13240, #22617)
+            if (dlOptions.overflow !== 'allow' ||
+                dlOptions.crop !== false ||
+                options.clip !== false) {
                 if (alignTo.y < 0) {
                     alignTo.height += alignTo.y;
                     alignTo.y = 0;
@@ -78,12 +79,14 @@ var ColumnDataLabel;
         }
         // When alignment is undefined (typically columns and bars), display the
         // individual point below or above the point depending on the threshold
-        options.align = pick(options.align, !inverted || inside ? 'center' : below ? 'right' : 'left');
-        options.verticalAlign = pick(options.verticalAlign, inverted || inside ? 'middle' : below ? 'top' : 'bottom');
+        dlOptions.align ?? (dlOptions.align = !inverted || inside ?
+            'center' : below ? 'right' : 'left');
+        dlOptions.verticalAlign ?? (dlOptions.verticalAlign = inverted || inside ?
+            'middle' : below ? 'top' : 'bottom');
         // Call the parent method
-        Series.prototype.alignDataLabel.call(this, point, dataLabel, options, alignTo, isNew);
+        Series.prototype.alignDataLabel.call(this, point, dataLabel, dlOptions, alignTo, isNew);
         // If label was justified and we have contrast, set it:
-        if (options.inside && point.contrastColor) {
+        if (dlOptions.inside && point.contrastColor) {
             dataLabel.css({
                 color: point.contrastColor
             });

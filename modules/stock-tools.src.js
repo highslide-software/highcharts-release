@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v12.1.2 (2024-12-21)
+ * @license Highstock JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/stock-tools
  * @requires highcharts
  * @requires highcharts/modules/stock
@@ -517,7 +517,7 @@ const navigation = {
                         }
                     ]
                 }, navigation.annotationsOptions, navigation.bindings.ellipseAnnotation
-                    .annotationOptions));
+                    .annotationsOptions));
             },
             steps: [
                 function (e, annotation) {
@@ -637,7 +637,7 @@ const navigation = {
      * from a different server.
      *
      * @type      {string}
-     * @default   https://code.highcharts.com/12.1.2/gfx/stock-icons/
+     * @default   https://code.highcharts.com/12.1.2-modified/gfx/stock-icons/
      * @since     7.1.3
      * @apioption navigation.iconsURL
      */
@@ -5524,7 +5524,7 @@ class Toolbar {
     getIconsURL() {
         return this.chart.options.navigation.iconsURL ||
             this.options.iconsURL ||
-            'https://code.highcharts.com/12.1.2/gfx/stock-icons/';
+            'https://code.highcharts.com/12.1.2-modified/gfx/stock-icons/';
     }
 }
 Toolbar.prototype.classMapping = {

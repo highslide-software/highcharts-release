@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v@product.version@ (@product.date@)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/boost
  * @requires highcharts
  *
@@ -16,5 +16,5 @@ import Highcharts from '../../Core/Globals.js';
 import Boost from '../../Extensions/Boost/Boost.js';
 const G = Highcharts;
 G.hasWebGLSupport = Boost.hasWebGLSupport;
-Boost.compose(G.Chart, G.Axis, G.Series, G.seriesTypes, G.Color);
+Boost.compose(G.Chart, G.Axis, G.Series, G.seriesTypes, G.Point, G.Color);
 export default Highcharts;

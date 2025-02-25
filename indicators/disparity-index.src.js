@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v12.1.2 (2024-12-21)
+ * @license Highstock JS v12.1.2-modified (2025-02-25)
  * @module highcharts/indicators/disparity-index
  * @requires highcharts
  * @requires highcharts/modules/stock

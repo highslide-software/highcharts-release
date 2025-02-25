@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/sunburst
  * @requires highcharts
  *
@@ -1013,9 +1013,6 @@ Breadcrumbs.defaultOptions = Breadcrumbs_BreadcrumbsDefaults.options;
  * Callback function to format the breadcrumb text from scratch.
  *
  * @callback Highcharts.BreadcrumbsFormatterCallbackFunction
- *
- * @param {Highcharts.Event} event
- * Event.
  *
  * @param {Highcharts.BreadcrumbOptions} options
  * Breadcrumb options.
@@ -2825,7 +2822,7 @@ class TreemapSeries extends ScatterSeries {
             return;
         }
         let childrenValues = [];
-        if (level && level.layoutStartingDirection) {
+        if (level?.layoutStartingDirection) {
             area.direction = level.layoutStartingDirection === 'vertical' ?
                 0 :
                 1;
@@ -2915,7 +2912,7 @@ class TreemapSeries extends ScatterSeries {
                 options.enabled = false;
             }
             // If options for level exists, include them as well
-            if (level && level.dataLabels) {
+            if (level?.dataLabels) {
                 options = TreemapSeries_merge(options, level.dataLabels);
                 series.hasDataLabels = () => true;
             }
@@ -3199,7 +3196,7 @@ class TreemapSeries extends ScatterSeries {
      * @private
      */
     onClickDrillToNode(event) {
-        const series = this, point = event.point, drillId = point && point.drillId;
+        const series = this, point = event.point, drillId = point?.drillId;
         // If a drill id is returned, add click event and cursor.
         if (TreemapSeries_isString(drillId)) {
             point.setState(''); // Remove hover
@@ -3213,7 +3210,7 @@ class TreemapSeries extends ScatterSeries {
     pointAttribs(point, state) {
         const series = this, mapOptionsToLevel = (TreemapSeries_isObject(series.mapOptionsToLevel) ?
             series.mapOptionsToLevel :
-            {}), level = point && mapOptionsToLevel[point.node.level] || {}, options = this.options, stateOptions = state && options.states && options.states[state] || {}, className = (point && point.getClassName()) || '', 
+            {}), level = point && mapOptionsToLevel[point.node.level] || {}, options = this.options, stateOptions = state && options.states && options.states[state] || {}, className = point?.getClassName() || '', 
         // Set attributes by precedence. Point trumps level trumps series.
         // Stroke width uses pick because it can be 0.
         attr = {
@@ -3222,11 +3219,11 @@ class TreemapSeries extends ScatterSeries {
                 stateOptions.borderColor ||
                 options.borderColor,
             'stroke-width': TreemapSeries_pick(point && point.borderWidth, level.borderWidth, stateOptions.borderWidth, options.borderWidth),
-            'dashstyle': (point && point.borderDashStyle) ||
+            'dashstyle': point?.borderDashStyle ||
                 level.borderDashStyle ||
                 stateOptions.borderDashStyle ||
                 options.borderDashStyle,
-            'fill': (point && point.color) || this.color
+            'fill': point?.color || this.color
         };
         let opacity;
         // Hide levels above the current view
@@ -3257,7 +3254,7 @@ class TreemapSeries extends ScatterSeries {
      * @private
      */
     setColorRecursive(node, parentColor, colorIndex, index, siblings) {
-        const series = this, chart = series && series.chart, colors = chart && chart.options && chart.options.colors;
+        const series = this, chart = series?.chart, colors = chart?.options?.colors;
         if (node) {
             const colorInfo = TreemapSeries_getColor(node, {
                 colors: colors,
@@ -3414,7 +3411,7 @@ class TreemapSeries extends ScatterSeries {
         // Sort the children
         stableSort(children, (a, b) => ((a.sortIndex || 0) - (b.sortIndex || 0)));
         // Set the values
-        let val = TreemapSeries_pick(point && point.options.value, childrenTotal);
+        let val = TreemapSeries_pick(point?.options.value, childrenTotal);
         if (point) {
             point.value = val;
         }
@@ -3428,12 +3425,12 @@ class TreemapSeries extends ScatterSeries {
             children: children,
             childrenTotal: childrenTotal,
             // Ignore this node if point is not visible
-            ignore: !(TreemapSeries_pick(point && point.visible, true) && (val > 0)),
+            ignore: !(TreemapSeries_pick(point?.visible, true) && (val > 0)),
             isLeaf: tree.visible && !childrenTotal,
             isGroup: point?.isGroup,
             levelDynamic: (tree.level - (levelIsConstant ? 0 : nodeRoot.level)),
-            name: TreemapSeries_pick(point && point.name, ''),
-            sortIndex: TreemapSeries_pick(point && point.sortIndex, -val),
+            name: TreemapSeries_pick(point?.name, ''),
+            sortIndex: TreemapSeries_pick(point?.sortIndex, -val),
             val: val
         });
         return tree;
@@ -4618,17 +4615,16 @@ const getEndPoint = function getEndPoint(x, y, angle, distance) {
 /** @private */
 function getDlOptions(params) {
     // Set options to new object to avoid problems with scope
-    const point = params.point, shape = SunburstSeries_isObject(params.shapeArgs) ? params.shapeArgs : {}, optionsPoint = (SunburstSeries_isObject(params.optionsPoint) ?
+    const point = params.point, shape = SunburstSeries_isObject(params.shapeArgs) ? params.shapeArgs : {}, { end = 0, radius = 0, start = 0 } = shape, optionsPoint = (SunburstSeries_isObject(params.optionsPoint) ?
         params.optionsPoint.dataLabels :
         {}), 
     // The splat was used because levels dataLabels
     // options doesn't work as an array
     optionsLevel = SunburstSeries_splat(SunburstSeries_isObject(params.level) ?
         params.level.dataLabels :
-        {})[0], options = SunburstSeries_merge({
-        style: {}
-    }, optionsLevel, optionsPoint), { innerArcLength = 0, outerArcLength = 0 } = point;
-    let rotationRad, rotation, rotationMode = options.rotationMode;
+        {})[0], options = SunburstSeries_merge(optionsLevel, optionsPoint), style = options.style = options.style || {}, { innerArcLength = 0, outerArcLength = 0 } = point;
+    let rotationRad, rotation, rotationMode = options.rotationMode, width = SunburstSeries_defined(style.width) ?
+        parseInt(style.width || '0', 10) : void 0;
     if (!SunburstSeries_isNumber(options.rotation)) {
         if (rotationMode === 'auto' || rotationMode === 'circular') {
             if (options.useHTML &&
@@ -4637,8 +4633,7 @@ function getDlOptions(params) {
                 // for HTML labels, see #18953
                 rotationMode = 'auto';
             }
-            if (innerArcLength < 1 &&
-                outerArcLength > shape.radius) {
+            if (innerArcLength < 1 && outerArcLength > radius) {
                 rotationRad = 0;
                 // Trigger setTextPath function to get textOutline etc.
                 if (point.dataLabelPath && rotationMode === 'circular') {
@@ -4646,9 +4641,13 @@ function getDlOptions(params) {
                         enabled: true
                     };
                 }
+                // If the slice is less than 180 degrees, set a reasonable width
+                // for fitting into the open slice (#22532)
+                if (end - start < Math.PI) {
+                    width = radius * 0.7;
+                }
             }
-            else if (innerArcLength > 1 &&
-                outerArcLength > 1.5 * shape.radius) {
+            else if (innerArcLength > 1 && outerArcLength > 1.5 * radius) {
                 if (rotationMode === 'circular') {
                     options.textPath = {
                         enabled: true,
@@ -4673,23 +4672,19 @@ function getDlOptions(params) {
             }
         }
         if (rotationMode !== 'auto' && rotationMode !== 'circular') {
-            if (point.dataLabel && point.dataLabel.textPath) {
+            if (point.dataLabel?.textPath) {
                 options.textPath = {
                     enabled: false
                 };
             }
-            rotationRad = (shape.end -
-                (shape.end - shape.start) / 2);
+            rotationRad = end - (end - start) / 2;
         }
         if (rotationMode === 'parallel') {
-            options.style.width = Math.min(shape.radius * 2.5, (outerArcLength + innerArcLength) / 2);
+            width = Math.min(radius * 2.5, (outerArcLength + innerArcLength) / 2);
         }
         else {
-            if (!SunburstSeries_defined(options.style.width) &&
-                shape.radius) {
-                options.style.width = point.node.level === 1 ?
-                    2 * shape.radius :
-                    shape.radius;
+            if (!SunburstSeries_defined(width) && radius) {
+                width = point.node.level === 1 ? 2 * radius : radius;
             }
         }
         if (rotationMode === 'perpendicular') {
@@ -4697,16 +4692,25 @@ function getDlOptions(params) {
             // yet because the label is not rendered. A better approach for this
             // would be to hide the label from the `alignDataLabel` function
             // when the actual line height is known.
-            if (outerArcLength < 16) {
-                options.style.width = 1;
+            const h = 16;
+            if (outerArcLength < h) {
+                width = 1;
             }
-            else {
-                options.style.lineClamp = Math.floor(innerArcLength / 16) || 1;
+            else if (shape.radius) {
+                style.lineClamp = Math.floor(innerArcLength / h) || 1;
+                // When the slice is narrow (< 16px) in the inner end, compute a
+                // safe margin to avoid the label overlapping the border
+                // (#22532)
+                const safeMargin = innerArcLength < h ?
+                    radius * ((h - innerArcLength) /
+                        (outerArcLength - innerArcLength)) :
+                    0;
+                width = radius - safeMargin;
             }
         }
         // Apply padding (#8515)
-        options.style.width = Math.max(options.style.width - 2 * (options.padding || 0), 1);
-        rotation = (rotationRad * rad2deg) % 180;
+        width = Math.max((width || 0) - 2 * (options.padding || 0), 1);
+        rotation = ((rotationRad || 0) * rad2deg) % 180;
         if (rotationMode === 'parallel') {
             rotation -= 90;
         }
@@ -4727,13 +4731,12 @@ function getDlOptions(params) {
             // Center dataLabel - disable textPath
             options.textPath.enabled = false;
             // Setting width and padding
-            options.style.width = Math.max((point.shapeExisting.r * 2) -
+            width = Math.max((point.shapeExisting.r * 2) -
                 2 * (options.padding || 0), 1);
         }
-        else if (point.dlOptions &&
-            point.dlOptions.textPath &&
+        else if (point.dlOptions?.textPath &&
             !point.dlOptions.textPath.enabled &&
-            (rotationMode === 'circular')) {
+            rotationMode === 'circular') {
             // Bring dataLabel back if was a center dataLabel
             options.textPath.enabled = true;
         }
@@ -4741,12 +4744,12 @@ function getDlOptions(params) {
             // Enable rotation to render text
             options.rotation = 0;
             // Setting width and padding
-            options.style.width = Math.max((point.outerArcLength +
-                point.innerArcLength) / 2 -
+            width = Math.max((outerArcLength + innerArcLength) / 2 -
                 2 * (options.padding || 0), 1);
-            options.style.whiteSpace = 'nowrap';
+            style.whiteSpace = 'nowrap';
         }
     }
+    style.width = width + 'px';
     return options;
 }
 /** @private */
@@ -4865,6 +4868,9 @@ class SunburstSeries extends SunburstSeries_TreemapSeries {
         if (labelOptions.textPath && labelOptions.textPath.enabled) {
             return;
         }
+        // In sunburst dataLabel may be placed, but this should be reset to
+        // make sure the dataLabel can be aligned to a new position (#21913)
+        dataLabel.placed = false;
         return super.alignDataLabel.apply(this, arguments);
     }
     /**

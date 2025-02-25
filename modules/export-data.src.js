@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/export-data
  * @requires highcharts
  * @requires highcharts/modules/exporting
@@ -1107,15 +1107,16 @@ function chartGetTableAST(useLocalDecimalPoint) {
         };
     };
     // Add table caption
-    if (options.exporting.tableCaption !== false) {
+    const { tableCaption } = options.exporting || {};
+    if (tableCaption !== false) {
         treeChildren.push({
             tagName: 'caption',
             attributes: {
                 'class': 'highcharts-table-caption'
             },
-            textContent: pick(options.exporting.tableCaption, (options.title.text ?
-                options.title.text :
-                'Chart'))
+            textContent: typeof tableCaption === 'string' ?
+                tableCaption :
+                options.title?.text || options.lang.chartTitle
         });
     }
     // Find longest row

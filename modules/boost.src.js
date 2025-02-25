@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v12.1.2 (2024-12-21)
+ * @license Highcharts JS v12.1.2-modified (2025-02-25)
  * @module highcharts/modules/boost
  * @requires highcharts
  *
@@ -1706,7 +1706,10 @@ class WGLRenderer {
                 continue;
             }
             // Cull points outside the extremes
-            if (y === null || (!isYInside && !nextInside && !prevInside)) {
+            // Continue if `sdata` has only one point as `nextInside` asserts
+            // whether the next point exists and will thus be false. (#22194)
+            if (y === null || (!isYInside && sdata.length > 1 &&
+                !nextInside && !prevInside)) {
                 beginSegment();
                 continue;
             }
@@ -2417,7 +2420,7 @@ function boostEnabled(chart) {
 /**
  * @private
  */
-function BoostSeries_compose(SeriesClass, seriesTypes, wglMode) {
+function BoostSeries_compose(SeriesClass, seriesTypes, PointClass, wglMode) {
     if (BoostSeries_pushUnique(BoostSeries_composed, 'Boost.Series')) {
         const plotOptions = getOptions().plotOptions, seriesProto = SeriesClass.prototype;
         BoostSeries_addEvent(SeriesClass, 'destroy', onSeriesDestroy);
@@ -2435,6 +2438,15 @@ function BoostSeries_compose(SeriesClass, seriesTypes, wglMode) {
             'drawPoints',
             'render'
         ].forEach((method) => wrapSeriesFunctions(seriesProto, seriesTypes, method));
+        wrap(PointClass.prototype, 'firePointEvent', function (proceed, type, e) {
+            if (type === 'click' && this.series.boosted) {
+                const point = e.point;
+                if ((point.dist || point.distX) >= (point.series.options.marker?.radius ?? 10)) {
+                    return;
+                }
+            }
+            return proceed.apply(this, [].slice.call(arguments, 1));
+        });
         // Set default options
         Boost_Boostables.forEach((type) => {
             const typePlotOptions = plotOptions[type];
@@ -3018,8 +3030,8 @@ function seriesRenderCanvas() {
     const options = this.options || {}, chart = this.chart, chartBoost = chart.boost, seriesBoost = this.boost, xAxis = this.xAxis, yAxis = this.yAxis, xData = options.xData || this.getColumn('x', true), yData = options.yData || this.getColumn('y', true), lowData = this.getColumn('low', true), highData = this.getColumn('high', true), rawData = this.processedData || options.data, xExtremes = xAxis.getExtremes(), 
     // Taking into account the offset of the min point #19497
     xMin = xExtremes.min - (xAxis.minPointOffset || 0), xMax = xExtremes.max + (xAxis.minPointOffset || 0), yExtremes = yAxis.getExtremes(), yMin = yExtremes.min - (yAxis.minPointOffset || 0), yMax = yExtremes.max + (yAxis.minPointOffset || 0), pointTaken = {}, sampling = !!this.sampling, enableMouseTracking = options.enableMouseTracking, threshold = options.threshold, isRange = this.pointArrayMap &&
-        this.pointArrayMap.join(',') === 'low,high', isStacked = !!options.stacking, cropStart = this.cropStart || 0, requireSorting = this.requireSorting, useRaw = !xData, compareX = options.findNearestPointBy === 'x', xDataFull = ((this.getColumn('x', true).length ?
-        this.getColumn('x', true) :
+        this.pointArrayMap.join(',') === 'low,high', isStacked = !!options.stacking, cropStart = this.cropStart || 0, requireSorting = this.requireSorting, useRaw = !xData, compareX = options.findNearestPointBy === 'x', xDataFull = ((this.getColumn('x').length ?
+        this.getColumn('x') :
         void 0) ||
         this.options.xData ||
         this.getColumn('x', true)), lineWidth = BoostSeries_pick(options.lineWidth, 1);
@@ -3634,7 +3646,7 @@ const Boost_contexts = [
 /**
  * @private
  */
-function Boost_compose(ChartClass, AxisClass, SeriesClass, seriesTypes, ColorClass) {
+function Boost_compose(ChartClass, AxisClass, SeriesClass, seriesTypes, PointClass, ColorClass) {
     const wglMode = hasWebGLSupport();
     if (!wglMode) {
         if (typeof (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default()).initCanvasBoost !== 'undefined') {
@@ -3653,7 +3665,7 @@ function Boost_compose(ChartClass, AxisClass, SeriesClass, seriesTypes, ColorCla
     }
     // WebGL support is alright, and we're good to go.
     Boost_BoostChart.compose(ChartClass, wglMode);
-    Boost_BoostSeries.compose(SeriesClass, seriesTypes, wglMode);
+    Boost_BoostSeries.compose(SeriesClass, seriesTypes, PointClass, wglMode);
     // Handle zooming by touch/pinch or mouse wheel. Assume that boosted charts
     // are too slow for a live preview while dragging. Instead, just scale the
     // div while `isPanning`.
@@ -3970,7 +3982,7 @@ const Boost = {
 
 const G = (highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default());
 G.hasWebGLSupport = Boost_Boost.hasWebGLSupport;
-Boost_Boost.compose(G.Chart, G.Axis, G.Series, G.seriesTypes, G.Color);
+Boost_Boost.compose(G.Chart, G.Axis, G.Series, G.seriesTypes, G.Point, G.Color);
 /* harmony default export */ const boost_src = ((highcharts_commonjs_highcharts_commonjs2_highcharts_root_Highcharts_default()));
 
 __webpack_exports__ = __webpack_exports__["default"];

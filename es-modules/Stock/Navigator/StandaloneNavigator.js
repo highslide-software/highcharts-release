@@ -118,8 +118,8 @@ class StandaloneNavigator {
             const removeSetExtremesEvent = addEvent(axis, 'setExtremes', (e) => {
                 if (e.trigger === 'pan' ||
                     e.trigger === 'zoom' ||
-                    e.trigger === 'mouseWheelZoom') {
-                    nav.setRange(e.min, e.max, true, e.trigger !== 'pan', { trigger: axis });
+                    e.trigger === 'mousewheel') {
+                    nav.setRange(e.min, e.max, true, e.trigger !== 'pan' && e.trigger !== 'mousewheel', { trigger: axis });
                 }
             });
             removeEventCallbacks.push(removeSetExtremesEvent);
