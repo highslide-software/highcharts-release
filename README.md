@@ -42,17 +42,14 @@ bower install highcharts
 ```
 
 ## Load Highcharts as a CommonJS module
-Highcharts is using an UMD module pattern, as a result it has support for CommonJS.
+Highcharts uses a UMD (Universal Module Definition) module pattern, which provides support for CommonJS. However, starting from version 12, the module system has been simplified.
 *The following examples presumes you are using npm to install Highcharts, see [Download and install Highcharts](#download-and-install-highcharts) for more details.*
 ```js
 // Load Highcharts
-var Highcharts = require('highcharts');
-// Alternatively, this is how to load Highcharts Stock. The Maps and Gantt
-// packages are similar.
-// var Highcharts = require('highcharts/highstock');
+const Highcharts = require('highcharts');
 
-// Load the exporting module, and initialize it.
-require('highcharts/modules/exporting')(Highcharts);
+// Load the exporting module (no need to initialize explicitly from v12)
+require('highcharts/modules/exporting');
 
 // Generate the chart
 Highcharts.chart('container', {
@@ -61,7 +58,7 @@ Highcharts.chart('container', {
 ```
 
 ## Load Highcharts as an ES6 module
-Since Highcharts supports CommonJS, it can be loaded as an ES6 module with the use of transpilers. Two common transpilers are [Babel](https://babeljs.io/) and [TypeScript](https://www.typescriptlang.org/). These have different interpretations of a CommonJS module, which affects your syntax.
+Since Highcharts supports CommonJS, it can be loaded as an ES6 module with the use of transpilers. Two common transpilers are [Babel](https://babeljs.io/) and [TypeScript](https://www.typescriptlang.org/). These have different interpretations of a CommonJS module, which affects your syntax. With Highcharts v12, ES6 modules are supported out of the box without the need to initialize module factories.
 *The following examples presumes you are using npm to install Highcharts, see [Download and install Highcharts](#download-and-install-highcharts) for more details.*
 ### Babel
 ```js
@@ -70,10 +67,7 @@ import Highcharts from 'highcharts';
 // packages are similar.
 // import Highcharts from 'highcharts/highstock';
 
-// Load the exporting module.
-import Exporting from 'highcharts/modules/exporting';
-// Initialize exporting module.
-Exporting(Highcharts);
+import 'highcharts/modules/exporting';
 
 // Generate the chart
 Highcharts.chart('container', {
@@ -82,15 +76,12 @@ Highcharts.chart('container', {
 ```
 ### TypeScript
 ```js
-import * as Highcharts from 'highcharts';
+import Highcharts from 'highcharts';
 // Alternatively, this is how to load Highcharts Stock. The Maps and Gantt
 // packages are similar.
 // import Highcharts from 'highcharts/highstock';
 
-// Load the exporting module.
-import * as Exporting from 'highcharts/modules/exporting';
-// Initialize exporting module.
-Exporting(Highcharts);
+import 'highcharts/modules/exporting';
 
 // Generate the chart
 Highcharts.chart('container', {
